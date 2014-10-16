@@ -2,8 +2,10 @@ package parser;
 
 
 import scanner.BCPLScanner;
+import scanner.LexicalException;
 import scanner.Scanner;
 import scanner.Token;
+import scanner.TokenKind;
 import util.AST.AST;
 
 /**
@@ -28,7 +30,12 @@ public class Parser {
         // Initializes the scanner object
         this.scanner = new BCPLScanner();
         
-        this.currentToken = this.scanner.getNextToken();
+        try {
+			this.currentToken = this.scanner.getNextToken();
+		} catch (LexicalException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
     /**
@@ -37,16 +44,21 @@ public class Parser {
      * @param kind
      * @throws SyntacticException
      */ //TODO
-    private void accept(int kind) throws SyntacticException {
+    private void accept(TokenKind kind) throws SyntacticException {
 		// If the current token kind is equal to the expected
         if(this.currentToken.getKind() == kind){
         // Gets next token
-            this.currentToken = this.scanner.getNextToken();
+            try {
+				this.currentToken = this.scanner.getNextToken();
+			} catch (LexicalException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
         // If not
         else{
         // Raises an exception
-            throw new SyntacticException(null, currentToken);
+            throw new SyntacticException("Unexpected ", currentToken);
         }
     }
 
@@ -54,7 +66,12 @@ public class Parser {
      * Gets next token
      */ //TODO
     private void acceptIt() {
-        this.currentToken = this.scanner.getNextToken();
+        try {
+			this.currentToken = this.scanner.getNextToken();
+		} catch (LexicalException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
     /**
@@ -78,25 +95,21 @@ public class Parser {
         
      */
     private void parseDeclarationList() throws SyntacticException {
-        
         switch(this.currentToken.getKind()){
-        
-            case Token.LET:
+            case LET:
                 acceptIt();
+
                 parseDefinition();
-                while(this.currentToken.getKind() == Token.AND){
+
+                while(this.currentToken.getKind() == TokenKind.AND){
                     acceptIt();
+                    
                     parseDefinition();
                 }
-            break;
-            
-            case Token.VARGLODEF:
-                parseVarGlobalDefinition();
-            break;
-                
+
+                break;
             default:
-                throw new SyntacticException(null, currentToken);
-          
+            	parseVarGlobalDefinition();
         }
     }
     /*
@@ -109,15 +122,15 @@ public class Parser {
         
         switch(this.currentToken.getKind()){
         
-            case Token.FUNCDEF:
+            case FUNCDEF:
                 parseFunctionDefinition();
             break;
                 
-            case Token.PROCDEF:
+            case PROCDEF:
                 parseProcedureDefiniton();
             break;
                 
-            case Token.VARDEF:
+            case VARDEF:
                 parseVariableDefinition();
             break;
                 
@@ -133,43 +146,31 @@ public class Parser {
      varGlobalDefinition      ::=    ('GLOBAL') (intVariableDefinition | boolVariableDefinition);
      */
     private void parseVarGlobalDefinition() throws SyntacticException {
-        if(this.currentToken.getKind() == Token.GLOBAL){
-            acceptIt();
-            switch(this.currentToken.getKind()){
-                
-                case Token.INTVARDEF:
-                    parseIntVariableDefinition();
+        accept(TokenKind.GLOBAL);
+
+        switch(this.currentToken.getKind()){
+            case INT:
+                parseIntVariableDefinition();
+
                 break;
-                    
-                case Token.BOOLVARDEF:
-                    parseBoolVariableDefinition();
-                break;
-                    
-                default:
-                    throw new SyntacticException(null, currentToken);
-                        
-            }
-            
-            
-        }
-        else{
-            throw new SyntacticException(null, currentToken);
+            default:
+            	parseBoolVariableDefinition();
         }
     }
-   
+
     /*
      functionDefinition       ::=    Identifier '(' parametersPrototype ')' '=' 'VALOF' functionBlock;
         
      */
 
     private void parseFunctionDefinition() throws SyntacticException{
-        if(this.currentToken.getKind() == Token.IDENTIFIER){
+        if(this.currentToken.getKind() == TokenKind.IDENTIFIER){
             acceptIt();
-            accept(Token.LPAR);
+            accept(TokenKind.LPAR);
             parseParametersPrototype();
-            accept(Token.RPAR);
-            accept(Token.EQUAL);
-            accept(Token.VALOF);
+            accept(TokenKind.RPAR);
+            accept(TokenKind.EQUAL);
+            accept(TokenKind.VALOF);
             parseFunctionBlock();
                 
             
@@ -184,13 +185,13 @@ public class Parser {
      */
     private void parseProcedureDefiniton() throws SyntacticException {
         
-        if(this.currentToken.getKind() == Token.IDENTIFIER){
+        if(this.currentToken.getKind() == TokenKind.IDENTIFIER){
             acceptIt();
-            accept(Token.LPAR);
+            accept(TokenKind.LPAR);
             parseParametersPrototype();
-            accept(Token.RPAR);
-            accept(Token.EQUAL);
-            accept(Token.BE);
+            accept(TokenKind.RPAR);
+            accept(TokenKind.EQUAL);
+            accept(TokenKind.BE);
             parseCommandBlock();
          
         }
@@ -208,11 +209,11 @@ public class Parser {
         
         switch(this.currentToken.getKind()){
             
-            case Token.BOOLVARDEF:
+            case BOOLVARDEF:
                 parseBoolVariableDefinition();
             break;
                 
-            case Token.INTVARDEF:
+            case INTVARDEF:
                 parseIntVariableDefinition();
             break;
                 
@@ -229,11 +230,11 @@ public class Parser {
      functionBlock            ::=    '{' commandList resultisCommand '}';
      */
     private void parseFunctionBlock() throws SyntacticException{
-        if(this.currentToken.getKind() == Token.RCURL){
+        if(this.currentToken.getKind() == TokenKind.RCURL){
             acceptIt();
             parseCommandList();
             parseResultIsCommand();
-            accept(Token.LCURL);
+            accept(TokenKind.LCURL);
         }
         else{
             throw new SyntacticException(null, currentToken);
@@ -246,20 +247,24 @@ public class Parser {
     private void parseParametersPrototype() throws SyntacticException {
         
         switch(this.currentToken.getKind()){
-            case Token.INT:
-            case Token.BOOL:
+            case INT:
+            case BOOL:
                 acceptIt();
                 parseIdentifier();
-                while(this.currentToken.getKind() == Token.VIRG){
+                while(this.currentToken.getKind() == TokenKind.VIRG){
                     acceptIt();
                     switch(this.currentToken.getKind()){
-                        case Token.INT:
-                        case Token.BOOL:
+                        case INT:
+                        case BOOL:
                             acceptIt();
                         break;
+					default:
+						break;
                     }
                     parseIdentifier();
                 }
+		default:
+			break;
                 
         }
         
@@ -270,7 +275,7 @@ public class Parser {
     */
     
     private void parseIdentifier() throws SyntacticException{
-        if(this.currentToken.getKind() == Token.IDENTIFIER){
+        if(this.currentToken.getKind() == TokenKind.IDENTIFIER){
             
         }
             
@@ -280,10 +285,10 @@ public class Parser {
      intVariableDefinition    ::=    ('INT' Identifier '=' numberExpression)*;
      */
     private void parseIntVariableDefinition() throws SyntacticException {
-        while(this.currentToken.getKind() == Token.INT){
+        while(this.currentToken.getKind() == TokenKind.INT){
             acceptIt();
             parseIdentifier();
-            accept(Token.EQUAL);
+            accept(TokenKind.EQUAL);
             parseNumberExpression();
             
         }
@@ -294,10 +299,10 @@ public class Parser {
      boolVariableDefinition   ::=    ('BOOL' Identifier '=' booleanExpression)*;
      */
     private void parseBoolVariableDefinition() throws SyntacticException {
-        while(this.currentToken.getKind() == Token.BOOL){
+        while(this.currentToken.getKind() == TokenKind.BOOL){
             acceptIt();
             parseIdentifier();
-            accept(Token.EQUAL);
+            accept(TokenKind.EQUAL);
             parseBooleanExpression();
         }
     }
@@ -306,10 +311,10 @@ public class Parser {
      commandBlock             ::=    '{' commandList '}';
      */
     private void parseCommandBlock() throws SyntacticException {
-        if(this.currentToken.getKind() == Token.RCURL){
+        if(this.currentToken.getKind() == TokenKind.RCURL){
             acceptIt();
             parseCommandList();
-            accept(Token.LCURL);
+            accept(TokenKind.LCURL);
         }
         else{
             throw new SyntacticException(null, currentToken);
@@ -320,9 +325,9 @@ public class Parser {
      parametersCallCommand    ::=   (Identifier (, Identifier)*)
      */
     private void parseParametersCallCommand() throws SyntacticException {
-        if(this.currentToken.getKind() == Token.IDENTIFIER){
+        if(this.currentToken.getKind() == TokenKind.IDENTIFIER){
             parseIdentifier();
-            while(this.currentToken.getKind() == Token.VIRG){
+            while(this.currentToken.getKind() == TokenKind.VIRG){
                 acceptIt();
                 parseIdentifier();
             }
@@ -337,7 +342,7 @@ public class Parser {
      */
     private void parseCommandList() throws SyntacticException {
         parseCommand();
-        while(this.currentToken.getKind() == Token.SEMICOL ){
+        while(this.currentToken.getKind() == TokenKind.SEMICOL ){
             acceptIt();
             parseCommand();
         }
@@ -357,35 +362,35 @@ public class Parser {
         
         switch(this.currentToken.getKind()){
             
-            case Token.ASGNCOM:
+            case ASGNCOM:
                 parseAssignmentCommand();
             break;
                 
-            case Token.WHILECOM:
+            case WHILECOM:
                 parseWhileCommand();
             break;
                 
-            case Token.IFCOM:
+            case IFCOM:
                 parseIfCommand();
             break;
             
-            case Token.CONTINUECOM:
+            case CONTINUECOM:
                 parseContinueCommand();
             break;
                 
-            case Token.BREAKCOM:
+            case BREAKCOM:
                 parseBreakCommand();
             break;
                 
-            case Token.PRINTCOM:
+            case PRINTCOM:
                 parsePrintCommand();
             break;
                 
-            case Token.CALLCOM:
+            case CALLCOM:
                 parseCallCommand();
             break;
                 
-            case Token.VARDCCOM:
+            case VARDCCOM:
                 parseVariableDecCommand();
             break;
                 
@@ -404,11 +409,11 @@ public class Parser {
      */
     private void parseCallCommand() throws SyntacticException{
         switch(this.currentToken.getKind()){
-            case Token.FUNCALLCOM:
+            case FUNCALLCOM:
                 parseFunctionCallCommand();
             break;
                 
-            case Token.PROCCALLCOM:
+            case PROCCALLCOM:
                 parseProcedureCallCommand();
             break;
                 
@@ -423,11 +428,11 @@ public class Parser {
      */
     private void parseVariableDecCommand() throws SyntacticException {
         switch(this.currentToken.getKind()){
-            case Token.INTVARDEF:
+            case INTVARDEF:
                 parseIntVariableDefinition();
             break;
                 
-            case Token.BOOLVARDEF:
+            case BOOLVARDEF:
                 parseBoolVariableDefinition();
             break;
                 
@@ -440,10 +445,10 @@ public class Parser {
      functionCallCommand      ::=    Identifier '('(parametersCallCommand)*')'
      */
     private void parseFunctionCallCommand() throws SyntacticException {
-        if(this.currentToken.getKind() == Token.IDENTIFIER){
+        if(this.currentToken.getKind() == TokenKind.IDENTIFIER){
             acceptIt();
-            accept(Token.RPAR);
-            while(this.currentToken.getKind() == Token.PARCALLCOM){
+            accept(TokenKind.RPAR);
+            while(this.currentToken.getKind() == TokenKind.PARCALLCOM){
                 parseParametersCallCommand();
             }
         }
@@ -457,10 +462,10 @@ public class Parser {
      */
 
     private void parseProcedureCallCommand() throws SyntacticException {
-        if(this.currentToken.getKind() == Token.IDENTIFIER){
+        if(this.currentToken.getKind() == TokenKind.IDENTIFIER){
             acceptIt();
-            accept(Token.RPAR);
-            while(this.currentToken.getKind() == Token.PARCALLCOM){
+            accept(TokenKind.RPAR);
+            while(this.currentToken.getKind() == TokenKind.PARCALLCOM){
                 parseParametersCallCommand();
             }
         }
@@ -474,16 +479,16 @@ public class Parser {
         
      */
     private void parseIfCommand()  throws SyntacticException{
-        if(this.currentToken.getKind() == Token.IF){
+        if(this.currentToken.getKind() == TokenKind.IF){
             acceptIt();
-            accept(Token.RPAR);
+            accept(TokenKind.RPAR);
             switch(this.currentToken.getKind()){
-                case Token.BOOLEXP:
+                case BOOLEXP:
                     parseBooleanExpression();
                 break;
                     
-                case Token.TRUE:
-                case Token.FALSE:
+                case TRUE:
+                case FALSE:
                     acceptIt();
                     parseCommandBlock();
                 break;
@@ -491,10 +496,10 @@ public class Parser {
                 default:
                     throw new SyntacticException(null, currentToken);
             }
-            if(this.currentToken.getKind() == Token.ELSE){
+            if(this.currentToken.getKind() == TokenKind.ELSE){
                 acceptIt();
                 parseCommandBlock();
-            }else if(this.currentToken.getKind() == Token.EOL){
+            }else if(this.currentToken.getKind() == TokenKind.EOL){
                 acceptIt();
             }
             else{
@@ -510,16 +515,16 @@ public class Parser {
      whileCommand             ::=    'WHILE' '(' ( booleanExpression | booleanValue ')' commandBlock;
      */
     private void parseWhileCommand() throws SyntacticException {
-        if(this.currentToken.getKind() == Token.WHILE){
+        if(this.currentToken.getKind() == TokenKind.WHILE){
             acceptIt();
-            accept(Token.RPAR);
+            accept(TokenKind.RPAR);
             switch(this.currentToken.getKind()){
-                case Token.BOOLEXP:
+                case BOOLEXP:
                     parseBooleanExpression();
                 break;
                     
-                case Token.TRUE:
-                case Token.BOOL:
+                case TRUE:
+                case BOOL:
                     acceptIt();
                 break;
                     
@@ -528,7 +533,7 @@ public class Parser {
                     throw new SyntacticException(null, currentToken);
             }
             
-            accept(Token.LPAR);
+            accept(TokenKind.LPAR);
             parseCommandBlock();
         }
         else{
@@ -540,12 +545,12 @@ public class Parser {
      resultisCommand          ::=    'RESULTIS' expression;
      */
     private void parseResultIsCommand() throws SyntacticException {
-        if(this.currentToken.getKind() == Token.RESULTIS){
+        if(this.currentToken.getKind() == TokenKind.RESULTIS){
             acceptIt();
             switch(this.currentToken.getKind()){
-                case Token.NUMBER:
-                case Token.TRUE:
-                case Token.FALSE:
+                case NUMBER:
+                case TRUE:
+                case FALSE:
                     acceptIt();
                 break;
                     
@@ -563,22 +568,22 @@ public class Parser {
      assignmentCommand        ::=    Identifier ':=' (number | booleanValue | numberExpression | functionCallCommand | Identifier);
      */
     private void parseAssignmentCommand() throws SyntacticException{
-        if(this.currentToken.getKind() == Token.IDENTIFIER){
+        if(this.currentToken.getKind() == TokenKind.IDENTIFIER){
             acceptIt();
-            accept(Token.EQUAL);
+            accept(TokenKind.EQUAL);
             switch(this.currentToken.getKind()){
-                case Token.NUMBER:
-                case Token.TRUE:
-                case Token.FALSE:
-                case Token.IDENTIFIER:
+                case NUMBER:
+                case TRUE:
+                case FALSE:
+                case IDENTIFIER:
                     acceptIt();
                 break;
                     
-                case Token.FUNCALLCOM:
+                case FUNCALLCOM:
                     parseFunctionCallCommand();
                 break;
                     
-                case Token.NUMBEREXP:
+                case NUMBEREXP:
                     parseNumberExpression();
                 break;
                     
@@ -598,7 +603,7 @@ public class Parser {
      */
 
     private void parseBreakCommand() throws SyntacticException {
-        if(this.currentToken.getKind() == Token.BREAK){
+        if(this.currentToken.getKind() == TokenKind.BREAK){
             acceptIt();
         }
         else{
@@ -613,7 +618,7 @@ public class Parser {
      continueCommand          ::=    'CONTINUE';
      */
     private void parseContinueCommand() throws SyntacticException {
-        if(this.currentToken.getKind() == Token.CONTINUE){
+        if(this.currentToken.getKind() == TokenKind.CONTINUE){
             acceptIt();
         }
         else{
@@ -627,10 +632,10 @@ public class Parser {
      printCommand             ::=    'WRITEF' '(' (Identifier)* ')';
      */
     private void parsePrintCommand() throws SyntacticException {
-        if(this.currentToken.getKind() == Token.WRITEF){
+        if(this.currentToken.getKind() == TokenKind.WRITEF){
             acceptIt();
-            accept(Token.RPAR);
-            while(this.currentToken.getKind() == Token.IDENTIFIER){
+            accept(TokenKind.RPAR);
+            while(this.currentToken.getKind() == TokenKind.IDENTIFIER){
                 parseIdentifier();
             }
         }
@@ -645,13 +650,13 @@ public class Parser {
      */
     private void parseNumberBoolExpression() throws SyntacticException {
         switch(this.currentToken.getKind()){
-            case Token.NUMBER:
-            case Token.IDENTIFIER:
+            case NUMBER:
+            case IDENTIFIER:
                 acceptIt();
-                accept(Token.OP_RELATION);
+                accept(TokenKind.OP_RELATION);
                 switch(this.currentToken.getKind()){
-                    case Token.NUMBER:
-                    case Token.IDENTIFIER:
+                    case NUMBER:
+                    case IDENTIFIER:
                         acceptIt();
                     break;
                     
@@ -671,11 +676,11 @@ public class Parser {
     private void parseArithmeticBoolExpression() throws SyntacticException {
         switch(this.currentToken.getKind()){
             
-            case Token.NUMBERBOOLEXP:
+            case NUMBERBOOLEXP:
                 parseNumberBoolExpression();
             break;
                 
-            case Token.ARITHEXP:
+            case ARITHEXP:
                 parseArithmeticExpression();
             break;
                 
@@ -689,23 +694,23 @@ public class Parser {
         
      */
     private void parseBooleanExpression() throws SyntacticException {
-        if(this.currentToken.getKind() == Token.NOT){
+        if(this.currentToken.getKind() == TokenKind.NOT){
             acceptIt();
         }
         switch(this.currentToken.getKind()){
-            case Token.ANDEXP:
+            case ANDEXP:
                 parseAndExpression();
             break;
                 
-            case Token.OREXP:
+            case OREXP:
                 parseOrExpression();                        
             break;
                 
-            case Token.EQUALEXP:
+            case EQUALEXP:
                 parseEqualExpression();
             break;
                 
-            case Token.NOTEQUALEXP:
+            case NOTEQUALEXP:
                 parseNotEqualExpression();
             break;
                 
@@ -719,10 +724,10 @@ public class Parser {
         
      */
     private void parseNumberExpression() throws SyntacticException {
-        if(this.currentToken.getKind() == Token.MULDIVEXP){
+        if(this.currentToken.getKind() == TokenKind.MULDIVEXP){
             parseMultDivExpression();
         }
-        if(this.currentToken.getKind() == Token.ARITHEXP){
+        if(this.currentToken.getKind() == TokenKind.ARITHEXP){
             parseArithmeticExpression();
         }
         else{
@@ -740,11 +745,11 @@ public class Parser {
     private void parseArithmeticExpression() throws SyntacticException {
         switch(this.currentToken.getKind()){
         
-            case Token.MULDIVEXP:
+            case MULDIVEXP:
                 parseMultDivExpression();
             break;
                 
-            case Token.ADDSUBEXP:
+            case ADDSUBEXP:
                 parseAddSubExpression();
             break;
                 
@@ -759,13 +764,13 @@ public class Parser {
      */
     private void parseMultDivExpression() throws SyntacticException {
         switch(this.currentToken.getKind()){
-            case Token.NUMBER:
-            case Token.IDENTIFIER:
+            case NUMBER:
+            case IDENTIFIER:
                 acceptIt();
-                accept(Token.OP_ARITMETIC);
+                accept(TokenKind.OP_ARITMETIC);
                 switch(this.currentToken.getKind()){
-                    case Token.NUMBER:
-                    case Token.IDENTIFIER:
+                    case NUMBER:
+                    case IDENTIFIER:
                         acceptIt();
                     
                     break;
@@ -786,13 +791,13 @@ public class Parser {
      */
     private void parseAddSubExpression() throws SyntacticException {
               switch(this.currentToken.getKind()){
-            case Token.NUMBER:
-            case Token.IDENTIFIER:
+            case NUMBER:
+            case IDENTIFIER:
                 acceptIt();
-                accept(Token.OP_ARITMETIC);
+                accept(TokenKind.OP_ARITMETIC);
                 switch(this.currentToken.getKind()){
-                    case Token.NUMBER:
-                    case Token.IDENTIFIER:
+                    case NUMBER:
+                    case IDENTIFIER:
                         acceptIt();
                     
                     break;
@@ -815,18 +820,18 @@ public class Parser {
     private void parseAndExpression() throws SyntacticException {
         switch(this.currentToken.getKind()){
             
-            case Token.NUMBERBOOLEXP:
+            case NUMBERBOOLEXP:
                 parseNumberBoolExpression();
             break;
                 
-            case Token.ARITHEXP:
+            case ARITHEXP:
                 parseArithmeticBoolExpression();
-                accept(Token.OP_RELATION);
+                accept(TokenKind.OP_RELATION);
                 parseArithmeticBoolExpression();
             break;
                 
-            case Token.TRUE:
-            case Token.FALSE:
+            case TRUE:
+            case FALSE:
                 acceptIt();
             break;
                 
@@ -835,22 +840,22 @@ public class Parser {
                 
                 
         }
-        if(this.currentToken.getKind() == Token.ANDLOGICAL){
+        if(this.currentToken.getKind() == TokenKind.ANDLOGICAL){
             acceptIt();
             
             switch(this.currentToken.getKind()){
-                case Token.NUMBERBOOLEXP:
+                case NUMBERBOOLEXP:
                     parseNumberBoolExpression();
                 break;
                 
-                case Token.ARITHEXP:
+                case ARITHEXP:
                     parseArithmeticBoolExpression();
-                    accept(Token.OP_RELATION);
+                    accept(TokenKind.OP_RELATION);
                     parseArithmeticBoolExpression();
                 break;
                 
-                case Token.TRUE:
-                case Token.FALSE:
+                case TRUE:
+                case FALSE:
                     acceptIt();
                 break;
 
@@ -871,18 +876,18 @@ public class Parser {
     private void parseOrExpression() throws SyntacticException {
         switch(this.currentToken.getKind()){
             
-            case Token.NUMBERBOOLEXP:
+            case NUMBERBOOLEXP:
                 parseNumberBoolExpression();
             break;
                 
-            case Token.ARITHEXP:
+            case ARITHEXP:
                 parseArithmeticBoolExpression();
-                accept(Token.OP_RELATION);
+                accept(TokenKind.OP_RELATION);
                 parseArithmeticBoolExpression();
             break;
                 
-            case Token.TRUE:
-            case Token.FALSE:
+            case TRUE:
+            case FALSE:
                 acceptIt();
             break;
                 
@@ -891,22 +896,22 @@ public class Parser {
                 
                 
         }
-        if(this.currentToken.getKind() == Token.ORLOGICAL){
+        if(this.currentToken.getKind() == TokenKind.ORLOGICAL){
             acceptIt();
             
             switch(this.currentToken.getKind()){
-                case Token.NUMBERBOOLEXP:
+                case NUMBERBOOLEXP:
                     parseNumberBoolExpression();
                 break;
                 
-                case Token.ARITHEXP:
+                case ARITHEXP:
                     parseArithmeticBoolExpression();
-                    accept(Token.OP_RELATION);
+                    accept(TokenKind.OP_RELATION);
                     parseArithmeticBoolExpression();
                 break;
                 
-                case Token.TRUE:
-                case Token.FALSE:
+                case TRUE:
+                case FALSE:
                     acceptIt();
                 break;
 
@@ -927,18 +932,18 @@ public class Parser {
         switch(this.currentToken.getKind()){
             
             
-            case Token.NUMBERBOOLEXP:
+            case NUMBERBOOLEXP:
                 parseNumberBoolExpression();
             break;
                 
-            case Token.ARITHEXP:
+            case ARITHEXP:
                 parseArithmeticBoolExpression();
-                accept(Token.OP_RELATION);
+                accept(TokenKind.OP_RELATION);
                 parseArithmeticBoolExpression();
             break;
                 
-            case Token.TRUE:
-            case Token.FALSE:
+            case TRUE:
+            case FALSE:
                 acceptIt();
             break;
                 
@@ -947,22 +952,22 @@ public class Parser {
                 
                 
         }
-        if(this.currentToken.getKind() == Token.EQUALLOGICAL){
+        if(this.currentToken.getKind() == TokenKind.EQUALLOGICAL){
             acceptIt();
             
             switch(this.currentToken.getKind()){
-                case Token.NUMBERBOOLEXP:
+                case NUMBERBOOLEXP:
                     parseNumberBoolExpression();
                 break;
                 
-                case Token.ARITHEXP:
+                case ARITHEXP:
                     parseArithmeticBoolExpression();
-                    accept(Token.OP_RELATION);
+                    accept(TokenKind.OP_RELATION);
                     parseArithmeticBoolExpression();
                 break;
                 
-                case Token.TRUE:
-                case Token.FALSE:
+                case TRUE:
+                case FALSE:
                     acceptIt();
                 break;
 
@@ -973,7 +978,6 @@ public class Parser {
         else{
             throw new SyntacticException(null, currentToken);
         }
-        
     }
 
     /*
@@ -982,43 +986,41 @@ public class Parser {
      */
     private void parseNotEqualExpression() throws SyntacticException {
         switch(this.currentToken.getKind()){
-            
-            case Token.NUMBERBOOLEXP:
+            case NUMBERBOOLEXP:
                 parseNumberBoolExpression();
             break;
                 
-            case Token.ARITHEXP:
+            case ARITHEXP:
                 parseArithmeticBoolExpression();
-                accept(Token.OP_RELATION);
+                accept(TokenKind.OP_RELATION);
                 parseArithmeticBoolExpression();
             break;
                 
-            case Token.TRUE:
-            case Token.FALSE:
+            case TRUE:
+            case FALSE:
                 acceptIt();
             break;
                 
             default:
                 throw new SyntacticException(null, currentToken);
-                
-                
         }
-        if(this.currentToken.getKind() == Token.NOTEQUALLOGICAL){
+
+        if(this.currentToken.getKind() == TokenKind.NOTEQUALLOGICAL){
             acceptIt();
             
             switch(this.currentToken.getKind()){
-                case Token.NUMBERBOOLEXP:
+                case NUMBERBOOLEXP:
                     parseNumberBoolExpression();
                 break;
                 
-                case Token.ARITHEXP:
+                case ARITHEXP:
                     parseArithmeticBoolExpression();
-                    accept(Token.OP_RELATION);
+                    accept(TokenKind.OP_RELATION);
                     parseArithmeticBoolExpression();
                 break;
                 
-                case Token.TRUE:
-                case Token.FALSE:
+                case TRUE:
+                case FALSE:
                     acceptIt();
                 break;
 

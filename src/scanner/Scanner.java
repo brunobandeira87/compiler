@@ -23,7 +23,7 @@ public class Scanner {
 
 	// The kind of the current token
 
-	protected int currentKind;
+	protected TokenKind currentKind;
 
 	// Buffer to append characters read from file
 
@@ -47,7 +47,7 @@ public class Scanner {
 	 * Returns the next token
 	 * @return
 	 */ //TODO
-	public Token getNextToken() {
+	public Token getNextToken() throws LexicalException {
 
 			// Initializes the string buffer
 			// Ignores separators
@@ -64,7 +64,7 @@ public class Scanner {
 	 * @return
 	 */
 	protected boolean isSeparator(char c) {
-		if ( c == '#' || c == ' ' || c == '\n' || c == '\t' ) {
+		if ( c == '#' || c == ' ' || c == '\n' || c == '\t') {
 			return true;
 		} else {
 			return false;
@@ -175,12 +175,12 @@ public class Scanner {
 	 * @return
 	 * @throws LexicalException
 	 */ //TODO
-	protected int scanToken() throws LexicalException {
+	protected TokenKind scanToken() throws LexicalException {
 
 		// The initial automata state is 0
 		// While loop to simulate the automata
 
-		return -1;
+		return TokenKind.UNKNOWN;
 	}
 
 }

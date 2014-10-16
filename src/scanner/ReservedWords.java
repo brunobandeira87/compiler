@@ -29,5 +29,7 @@ public class ReservedWords {
 	public static final String WHILE = "WHILE";
 
 	public static final String WRITEF = "WRITEF";
+	
+	public static final String VALOF = "VALOF";
 
 }

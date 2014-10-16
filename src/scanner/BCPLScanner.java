@@ -1,9 +1,18 @@
 package scanner;
 
+import util.Arquivo;
+
 public class BCPLScanner extends Scanner {
 
 	public BCPLScanner() {
 		super();
+	}
+
+	public BCPLScanner(String inputFile) {
+		this.file = new Arquivo(inputFile);
+		this.line = 0;
+		this.column = 0;
+		this.currentChar = this.file.readChar();
 	}
 
 	public String getCurrentSpelling() {
@@ -11,7 +20,7 @@ public class BCPLScanner extends Scanner {
 	}
 
 	@Override
-	public Token getNextToken() {
+	public Token getNextToken() throws LexicalException {
 		while (isSeparator(currentChar)) {
 			scanSeparator();
 		}
@@ -23,26 +32,59 @@ public class BCPLScanner extends Scanner {
 		return new Token(currentKind, getCurrentSpelling(), line, column);
 	}
 
-	public int lookupReservedWord(String word) {
-		if (word.equals(ReservedWords.IF)) {
+	public TokenKind lookupReservedWord(String word) {
+		if (word.equals(ReservedWords.AND)) {
+			return TokenKind.AND;
+		}
+		else if (word.equals(ReservedWords.BOOL)) {
+			return TokenKind.BOOL;
+		}
+		else if (word.equals(ReservedWords.BREAK)) {
+			return TokenKind.BREAK;
+		}
+		else if (word.equals(ReservedWords.CONTINUE)) {
+			return TokenKind.CONTINUE;
+		}
+		else if (word.equals(ReservedWords.ELSE)) {
+			return TokenKind.ELSE;
+		}
+		else if (word.equals(ReservedWords.FALSE)) {
+			return TokenKind.FALSE;
+		}
+		else if (word.equals(ReservedWords.GLOBAL)) {
+			return TokenKind.GLOBAL;
+		}
+		else if (word.equals(ReservedWords.IF)) {
+			return TokenKind.IF;
+		}
+		else if (word.equals(ReservedWords.INT)) {
+			return TokenKind.INT;
+		}
+		else if (word.equals(ReservedWords.LET)) {
+			return TokenKind.LET;
+		}
+		else if (word.equals(ReservedWords.RESULTIS)) {
+			return TokenKind.RESULTIS;
+		}
+		else if (word.equals(ReservedWords.TRUE)) {
+			return TokenKind.TRUE;
+		}
+		else if (word.equals(ReservedWords.WHILE)) {
+			return TokenKind.WHILE;
+		}
+		else if (word.equals(ReservedWords.WRITEF)) {
+			return TokenKind.WRITEF;
+		}
+		else if (word.equals(ReservedWords.VALOF)) {
+			return TokenKind.VALOF;
 		}
 
-		return -1;
+		return null;
 	}
 
 	@Override
 	protected void scanSeparator() {
 		switch (currentChar) {
-			case '/':
-				getNextChar();
-
-				if (currentChar == '/') {
-					while (isGraphic(currentChar) && currentChar != '\n') {
-						getNextChar();
-					}
-				}
-
-				break;
 			case ' ':
 			case '\r':
 			case '\t':
@@ -54,7 +96,7 @@ public class BCPLScanner extends Scanner {
 	}
 
 	@Override
-	protected int scanToken() {
+	protected TokenKind scanToken() throws LexicalException {
 		switch (currentChar) {
 			case 'a':
 			case 'A':
@@ -114,13 +156,13 @@ public class BCPLScanner extends Scanner {
 					getNextChar();
 				}
 
-				int reservedWord = lookupReservedWord(getCurrentSpelling());
+				TokenKind reservedWord = lookupReservedWord(getCurrentSpelling());
 
-				if (reservedWord > -1) {
+				if (reservedWord != null) {
 					return reservedWord;
 				}
 
-				return Token.IDENTIFIER;
+				return TokenKind.IDENTIFIER;
 			case '0':
 			case '1':
 			case '2':
@@ -137,18 +179,30 @@ public class BCPLScanner extends Scanner {
 					getNextChar();
 				}
 
-				return Token.NUMBER;
+				return TokenKind.NUMBER;
 			case '+':
 			case '-':
 			case '*':
 			case '/':
 				getNextChar();
 
-				return Token.OP_ARITMETIC;
+				if (currentChar == '/') {
+					do {
+						getNextChar();
+					}
+					while (currentChar != '\n');
+
+					getNextChar();
+					
+					return TokenKind.COMMENT;
+				}
+				else {
+					return TokenKind.OP_ARITMETIC;
+				}
 			case ':':
 				getNextChar();
 
-				return Token.OP_ATTR;
+				return TokenKind.OP_ATTR;
 			case '<':
 			case '>':
 			case '!':
@@ -157,48 +211,46 @@ public class BCPLScanner extends Scanner {
 				if (currentChar == '=') {
 					getNextChar();
 
-					return Token.OP_RELATION;
+					return TokenKind.OP_RELATION;
 				}
 				else {
-					return Token.OP_RELATION;
+					return TokenKind.OP_RELATION;
 				}
-
 			case '=':
 				getNextChar();
 
 				if (currentChar == '=') {
 					getNextChar();
 
-					return Token.OP_RELATION;
+					return TokenKind.OP_RELATION;
 				}
 				else {
-					return Token.OP_ATTR;
+					return TokenKind.OP_ATTR;
 				}
-
 			case '(':
 				getNextChar();
 
-				return Token.LPAR;
+				return TokenKind.LPAR;
 			case ')':
 				getNextChar();
 
-				return Token.RPAR;
+				return TokenKind.RPAR;
 			case '{':
 				getNextChar();
 
-				return Token.LCURL;
+				return TokenKind.LCURL;
 			case '}':
 				getNextChar();
 
-				return Token.RCURL;
+				return TokenKind.RCURL;
 			case ';':
 				getNextChar();
 
-				return Token.SEMICOL;
+				return TokenKind.SEMICOL;
 			case 0:
-				return Token.EOF;
+				return TokenKind.EOF;
 			default:
-				return Token.UNKNOWN;
+				throw new LexicalException("Unexpected character.", currentChar, line, column);
 		}
 	}
 

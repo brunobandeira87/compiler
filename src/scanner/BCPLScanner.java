@@ -5,12 +5,10 @@ import util.Arquivo;
 public class BCPLScanner extends Scanner {
 
 	public BCPLScanner() {
-
 		super();
 	}
 
 	public BCPLScanner(String inputFile) {
-
 		this.file = new Arquivo(inputFile);
 		this.line = 0;
 		this.column = 0;
@@ -253,6 +251,10 @@ public class BCPLScanner extends Scanner {
 				getNextChar();
 
 				return TokenKind.SEMICOL;
+			case ',':
+				getNextChar();
+
+				return TokenKind.VIRG;
 			case 0:
 				return TokenKind.EOF;
 			default:

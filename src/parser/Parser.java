@@ -1,6 +1,6 @@
 package parser;
 
-import org.omg.CORBA.SystemException;
+
 import scanner.Scanner;
 import scanner.Token;
 import util.AST.AST;
@@ -247,11 +247,24 @@ public class Parser {
             case Token.BOOL:
                 acceptIt();
                 parseIdentifier();
-                while()
+                while(this.currentToken.getKind() == Token.VIRG){
+                    acceptIt();
+                    switch(this.currentToken.getKind()){
+                        case Token.INT:
+                        case Token.BOOL:
+                            acceptIt();
+                        break;
+                    }
+                    parseIdentifier();
+                }
                 
         }
         
     }
+    
+    /*
+    Precisa da classe Scanner implementada
+    */
     
     private void parseIdentifier() throws SyntacticException{
         if(this.currentToken.getKind() == Token.IDENTIFIER){
@@ -264,15 +277,14 @@ public class Parser {
      intVariableDefinition    ::=    ('INT' Identifier '=' numberExpression)*;
      */
     private void parseIntVariableDefinition() throws SyntacticException {
-        if(this.currentToken.getKind() == Token.INT){
+        while(this.currentToken.getKind() == Token.INT){
             acceptIt();
             parseIdentifier();
             accept(Token.EQUAL);
+            parseNumberExpression();
             
         }
-        else{
-            throw new SyntacticException(null, currentToken);
-        }
+        
     }
 
     /*
@@ -508,6 +520,7 @@ public class Parser {
                     acceptIt();
                 break;
                     
+                    
                 default:
                     throw new SyntacticException(null, currentToken);
             }
@@ -524,6 +537,22 @@ public class Parser {
      resultisCommand          ::=    'RESULTIS' expression;
      */
     private void parseResultIsCommand() throws SyntacticException {
+        if(this.currentToken.getKind() == Token.RESULTIS){
+            acceptIt();
+            switch(this.currentToken.getKind()){
+                case Token.NUMBER:
+                case Token.TRUE:
+                case Token.FALSE:
+                    acceptIt();
+                break;
+                    
+                default:
+                    throw new SyntacticException(null, currentToken);
+            }
+        }
+        else{
+            throw new SyntacticException(null, currentToken);
+        }
         
     }
 
@@ -531,6 +560,33 @@ public class Parser {
      assignmentCommand        ::=    Identifier ':=' (number | booleanValue | numberExpression | functionCallCommand | Identifier);
      */
     private void parseAssignmentCommand() throws SyntacticException{
+        if(this.currentToken.getKind() == Token.IDENTIFIER){
+            acceptIt();
+            accept(Token.EQUAL);
+            switch(this.currentToken.getKind()){
+                case Token.NUMBER:
+                case Token.TRUE:
+                case Token.FALSE:
+                case Token.IDENTIFIER:
+                    acceptIt();
+                break;
+                    
+                case Token.FUNCALLCOM:
+                    parseFunctionCallCommand();
+                break;
+                    
+                case Token.NUMBEREXP:
+                    parseNumberExpression();
+                break;
+                    
+                default:
+                    throw new SyntacticException(null, currentToken);
+            }
+        }
+        
+        else{
+            throw new SyntacticException(null, currentToken);
+        }
         
     }
     /*
@@ -539,6 +595,13 @@ public class Parser {
      */
 
     private void parseBreakCommand() throws SyntacticException {
+        if(this.currentToken.getKind() == Token.BREAK){
+            acceptIt();
+        }
+        else{
+            throw new SyntacticException(null, currentToken);
+        }
+        
         
     }
     
@@ -547,6 +610,14 @@ public class Parser {
      continueCommand          ::=    'CONTINUE';
      */
     private void parseContinueCommand() throws SyntacticException {
+        if(this.currentToken.getKind() == Token.CONTINUE){
+            acceptIt();
+        }
+        else{
+            throw new SyntacticException(null, currentToken);
+        }
+        
+                
     }
 
     /*
@@ -560,6 +631,9 @@ public class Parser {
                 parseIdentifier();
             }
         }
+        else{
+            throw new SyntacticException(null, currentToken);
+        }
     }
 
     /*
@@ -567,12 +641,44 @@ public class Parser {
         
      */
     private void parseNumberBoolExpression() throws SyntacticException {
+        switch(this.currentToken.getKind()){
+            case Token.NUMBER:
+            case Token.IDENTIFIER:
+                acceptIt();
+                accept(Token.OP_RELATION);
+                switch(this.currentToken.getKind()){
+                    case Token.NUMBER:
+                    case Token.IDENTIFIER:
+                        acceptIt();
+                    break;
+                    
+                    default:
+                        throw new SyntacticException(null, currentToken);
+                }
+            break;
+            
+            default:
+                throw new SyntacticException(null, currentToken);
+        }
     }
 
     /*
      arithBoolExpression      ::= arithmeticExpression | numberBoolExpression
      */
     private void parseArithmeticBoolExpression() throws SyntacticException {
+        switch(this.currentToken.getKind()){
+            
+            case Token.NUMBERBOOLEXP:
+                parseNumberBoolExpression();
+            break;
+                
+            case Token.ARITHEXP:
+                parseArithmeticExpression();
+            break;
+                
+            default:
+                throw new SyntacticException(null, currentToken);
+        }
     }
 
     /*
@@ -580,6 +686,29 @@ public class Parser {
         
      */
     private void parseBooleanExpression() throws SyntacticException {
+        if(this.currentToken.getKind() == Token.NOT){
+            acceptIt();
+        }
+        switch(this.currentToken.getKind()){
+            case Token.ANDEXP:
+                parseAndExpression();
+            break;
+                
+            case Token.OREXP:
+                parseOrExpression();                        
+            break;
+                
+            case Token.EQUALEXP:
+                parseEqualExpression();
+            break;
+                
+            case Token.NOTEQUALEXP:
+                parseNotEqualExpression();
+            break;
+                
+            default:
+                throw new SyntacticException(null, currentToken);
+        }
     }
 
     /*
@@ -587,6 +716,18 @@ public class Parser {
         
      */
     private void parseNumberExpression() throws SyntacticException {
+        if(this.currentToken.getKind() == Token.MULDIVEXP){
+            parseMultDivExpression();
+        }
+        if(this.currentToken.getKind() == Token.ARITHEXP){
+            parseArithmeticExpression();
+        }
+        else{
+            throw new SyntacticException(null, currentToken);
+        }
+        
+        
+        
     }
 
     /*
@@ -614,12 +755,54 @@ public class Parser {
      multDivExpression        ::=  (Identifier | number) ('/' | '*') (Identifier | number)
      */
     private void parseMultDivExpression() throws SyntacticException {
+        switch(this.currentToken.getKind()){
+            case Token.NUMBER:
+            case Token.IDENTIFIER:
+                acceptIt();
+                accept(Token.OP_ARITMETIC);
+                switch(this.currentToken.getKind()){
+                    case Token.NUMBER:
+                    case Token.IDENTIFIER:
+                        acceptIt();
+                    
+                    break;
+                    
+                    default:
+                        throw new SyntacticException(null, currentToken);
+                }
+            break;
+                
+            
+            default:
+                throw new SyntacticException(null, currentToken);
+        }
     }
 
     /*
      addSubExpression         ::=  (Identifier | number) ('+' | '-') (Identifier | number)                         
      */
     private void parseAddSubExpression() throws SyntacticException {
+              switch(this.currentToken.getKind()){
+            case Token.NUMBER:
+            case Token.IDENTIFIER:
+                acceptIt();
+                accept(Token.OP_ARITMETIC);
+                switch(this.currentToken.getKind()){
+                    case Token.NUMBER:
+                    case Token.IDENTIFIER:
+                        acceptIt();
+                    
+                    break;
+                    
+                    default:
+                        throw new SyntacticException(null, currentToken);
+                }
+            break;
+                
+            
+            default:
+                throw new SyntacticException(null, currentToken);
+        }
     }
 
     /*
@@ -627,6 +810,54 @@ public class Parser {
      ( numberBoolExpression |(arithmeticExpression op_rel arithmeticExpression) | booleanValue)
      */
     private void parseAndExpression() throws SyntacticException {
+        switch(this.currentToken.getKind()){
+            
+            case Token.NUMBERBOOLEXP:
+                parseNumberBoolExpression();
+            break;
+                
+            case Token.ARITHEXP:
+                parseArithmeticBoolExpression();
+                accept(Token.OP_RELATION);
+                parseArithmeticBoolExpression();
+            break;
+                
+            case Token.TRUE:
+            case Token.FALSE:
+                acceptIt();
+            break;
+                
+            default:
+                throw new SyntacticException(null, currentToken);
+                
+                
+        }
+        if(this.currentToken.getKind() == Token.ANDLOGICAL){
+            acceptIt();
+            
+            switch(this.currentToken.getKind()){
+                case Token.NUMBERBOOLEXP:
+                    parseNumberBoolExpression();
+                break;
+                
+                case Token.ARITHEXP:
+                    parseArithmeticBoolExpression();
+                    accept(Token.OP_RELATION);
+                    parseArithmeticBoolExpression();
+                break;
+                
+                case Token.TRUE:
+                case Token.FALSE:
+                    acceptIt();
+                break;
+
+                default:
+                    throw new SyntacticException(null, currentToken);
+            }
+        }
+        else{
+            throw new SyntacticException(null, currentToken);
+        }
     }
 
     /*
@@ -635,6 +866,54 @@ public class Parser {
         
      */
     private void parseOrExpression() throws SyntacticException {
+        switch(this.currentToken.getKind()){
+            
+            case Token.NUMBERBOOLEXP:
+                parseNumberBoolExpression();
+            break;
+                
+            case Token.ARITHEXP:
+                parseArithmeticBoolExpression();
+                accept(Token.OP_RELATION);
+                parseArithmeticBoolExpression();
+            break;
+                
+            case Token.TRUE:
+            case Token.FALSE:
+                acceptIt();
+            break;
+                
+            default:
+                throw new SyntacticException(null, currentToken);
+                
+                
+        }
+        if(this.currentToken.getKind() == Token.ORLOGICAL){
+            acceptIt();
+            
+            switch(this.currentToken.getKind()){
+                case Token.NUMBERBOOLEXP:
+                    parseNumberBoolExpression();
+                break;
+                
+                case Token.ARITHEXP:
+                    parseArithmeticBoolExpression();
+                    accept(Token.OP_RELATION);
+                    parseArithmeticBoolExpression();
+                break;
+                
+                case Token.TRUE:
+                case Token.FALSE:
+                    acceptIt();
+                break;
+
+                default:
+                    throw new SyntacticException(null, currentToken);
+            }
+        }
+        else{
+            throw new SyntacticException(null, currentToken);
+        }
     }
 
     /*
@@ -642,6 +921,56 @@ public class Parser {
      '==' (numberBoolExpression |(arithmeticExpression op_rel (arithmeticExpression | number)) | booleanValue )
      */
     private void parseEqualExpression() throws SyntacticException {
+        switch(this.currentToken.getKind()){
+            
+            
+            case Token.NUMBERBOOLEXP:
+                parseNumberBoolExpression();
+            break;
+                
+            case Token.ARITHEXP:
+                parseArithmeticBoolExpression();
+                accept(Token.OP_RELATION);
+                parseArithmeticBoolExpression();
+            break;
+                
+            case Token.TRUE:
+            case Token.FALSE:
+                acceptIt();
+            break;
+                
+            default:
+                throw new SyntacticException(null, currentToken);
+                
+                
+        }
+        if(this.currentToken.getKind() == Token.EQUALLOGICAL){
+            acceptIt();
+            
+            switch(this.currentToken.getKind()){
+                case Token.NUMBERBOOLEXP:
+                    parseNumberBoolExpression();
+                break;
+                
+                case Token.ARITHEXP:
+                    parseArithmeticBoolExpression();
+                    accept(Token.OP_RELATION);
+                    parseArithmeticBoolExpression();
+                break;
+                
+                case Token.TRUE:
+                case Token.FALSE:
+                    acceptIt();
+                break;
+
+                default:
+                    throw new SyntacticException(null, currentToken);
+            }
+        }
+        else{
+            throw new SyntacticException(null, currentToken);
+        }
+        
     }
 
     /*
@@ -649,27 +978,54 @@ public class Parser {
     '!=' (numberBoolExpression |(arithmeticExpression op_rel (arithmeticExpression | number)) | booleanValue )
      */
     private void parseNotEqualExpression() throws SyntacticException {
+        switch(this.currentToken.getKind()){
+            
+            case Token.NUMBERBOOLEXP:
+                parseNumberBoolExpression();
+            break;
+                
+            case Token.ARITHEXP:
+                parseArithmeticBoolExpression();
+                accept(Token.OP_RELATION);
+                parseArithmeticBoolExpression();
+            break;
+                
+            case Token.TRUE:
+            case Token.FALSE:
+                acceptIt();
+            break;
+                
+            default:
+                throw new SyntacticException(null, currentToken);
+                
+                
+        }
+        if(this.currentToken.getKind() == Token.NOTEQUALLOGICAL){
+            acceptIt();
+            
+            switch(this.currentToken.getKind()){
+                case Token.NUMBERBOOLEXP:
+                    parseNumberBoolExpression();
+                break;
+                
+                case Token.ARITHEXP:
+                    parseArithmeticBoolExpression();
+                    accept(Token.OP_RELATION);
+                    parseArithmeticBoolExpression();
+                break;
+                
+                case Token.TRUE:
+                case Token.FALSE:
+                    acceptIt();
+                break;
+
+                default:
+                    throw new SyntacticException(null, currentToken);
+            }
+        }
+        else{
+            throw new SyntacticException(null, currentToken);
+        }
     }
 
-    /*
-        
-                         
-
-
-     identifierList           ::=    Identifier (',' Identifier)*;
-                         
-
-
-
-
-
-                         
-
-     booleanValue            ::= 'TRUE'
-     |  'FALSE'
-
-
-        
-        
-     */
 }

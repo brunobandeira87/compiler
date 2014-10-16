@@ -1,6 +1,7 @@
 package parser;
 
 
+import scanner.BCPLScanner;
 import scanner.Scanner;
 import scanner.Token;
 import util.AST.AST;
@@ -25,7 +26,7 @@ public class Parser {
      */
     public Parser() {
         // Initializes the scanner object
-        this.scanner = new Scanner();
+        this.scanner = new BCPLScanner();
     }
 
     /**
@@ -162,7 +163,7 @@ public class Parser {
     private void parseFunctionDefinition() throws SyntacticException{
         if(this.currentToken.getKind() == Token.IDENTIFIER){
             acceptIt();
-            acceptIt(Token.LPAR);
+            accept(Token.LPAR);
             parseParametersPrototype();
             accept(Token.RPAR);
             accept(Token.EQUAL);
@@ -183,7 +184,7 @@ public class Parser {
         
         if(this.currentToken.getKind() == Token.IDENTIFIER){
             acceptIt();
-            acceptIt(Token.LPAR);
+            accept(Token.LPAR);
             parseParametersPrototype();
             accept(Token.RPAR);
             accept(Token.EQUAL);

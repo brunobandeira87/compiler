@@ -11,7 +11,7 @@ public class BCPLScanner extends Scanner {
 	}
 
 	@Override
-	public Token getNextToken() throws LexicalException {
+	public Token getNextToken() {
 		while (isSeparator(currentChar)) {
 			scanSeparator();
 		}
@@ -31,7 +31,7 @@ public class BCPLScanner extends Scanner {
 	}
 
 	@Override
-	protected void scanSeparator() throws LexicalException {
+	protected void scanSeparator() {
 		switch (currentChar) {
 			case '/':
 				getNextChar();
@@ -54,7 +54,7 @@ public class BCPLScanner extends Scanner {
 	}
 
 	@Override
-	protected int scanToken() throws LexicalException {
+	protected int scanToken() {
 		switch (currentChar) {
 			case 'a':
 			case 'A':
@@ -198,9 +198,7 @@ public class BCPLScanner extends Scanner {
 			case 0:
 				return Token.EOF;
 			default:
-				System.out.println(Integer.valueOf(currentChar));
-				throw new LexicalException(
-					"Invalid character.", currentChar, line, column);
+				return Token.UNKNOWN;
 		}
 	}
 

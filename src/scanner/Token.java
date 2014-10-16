@@ -128,8 +128,6 @@ public class Token {
 	    ORLOGICAL = 63,
 	    EQUALLOGICAL = 64,
 	    NOTEQUALLOGICAL = 65,
-		EOF = 66;
-               
-        
-            
+		EOF = 66,
+		UNKNOWN = 67;
 }

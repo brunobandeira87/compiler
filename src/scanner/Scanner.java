@@ -47,7 +47,7 @@ public class Scanner {
 	 * Returns the next token
 	 * @return
 	 */ //TODO
-	public Token getNextToken() throws LexicalException {
+	public Token getNextToken() {
 
 			// Initializes the string buffer
 			// Ignores separators

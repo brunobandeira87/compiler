@@ -14,7 +14,7 @@ program ::= declarationList;
 declarationList ::= 'LET' definition ('AND' definition)*;
 
 definition ::= callableDefinition
-		     | variableDefinition;
+		| variableDefinition;
 
 identifierList ::= Identifier (',' Identifier)*;
 
@@ -36,7 +36,6 @@ boolVariableDefinition ::= ('BOOL' Identifier '=' booleanExpression)*;
 
 commandBlock ::= '{' commandList '}';
 
-
 parametersCallCommand ::= (Identifier (, Identifier)*)*
 
 commandList ::= command (';' command)*;
@@ -51,7 +50,7 @@ command ::= assignmentCommand
 			| printCommand
 
 variableDecCommand ::= intVariableDefinition
-					   | boolVariableDefinition
+					| boolVariableDefinition
 
 callCommand ::= Identifier '('(parametersCallCommand)*')'
 
@@ -92,7 +91,7 @@ equalExpression ::= (numberBoolExpression |(arithmeticExpression op_rel (arithme
 notEqualExpression ::= (numberBoolExpression |(arithmeticExpression op_rel (arithmeticExpression | number)) | booleanValue ) '!=' (numberBoolExpression |(arithmeticExpression op_rel (arithmeticExpression | number)) | booleanValue )
 
 booleanValue ::= 'TRUE'
-				 | 'FALSE'
+				| 'FALSE'
 */
 
 public class GrammarSymbols {

@@ -290,6 +290,25 @@ public class Parser {
 	}
 
 	/**
+	 * callableDefinition ::= Identifier '(' parametersPrototype ')';
+	 */
+	private void parseCallableDefinition() throws SyntacticException {
+		accept(TokenKind.IDENTIFIER);
+		accept(TokenKind.LPAR);
+
+		parseParametersPrototype();
+
+		accept(TokenKind.RPAR);
+
+		if (currentToken.getKind() == TokenKind.BE) {
+			parseProcedureDefinitonTail();
+		}
+		else {
+			parseFunctionDefinitionTail();
+		}
+	}
+
+	/**
 	 * callCommand ::= functionCallCommand | procedureCallCommand
 	 */
 	private void parseCallCommand() throws SyntacticException {
@@ -338,7 +357,6 @@ public class Parser {
 			case GLOBAL:
 				parseVariableDecCommand();
 			case IDENTIFIER:
-				
 		}
 	}
 
@@ -420,25 +438,6 @@ public class Parser {
 
 		parseVariableDefinition();
 	}
-	
-	/**
-	 * callableDefinition ::= Identifier '(' parametersPrototype ')';
-	 */
-	private void parseCallableDefinition() throws SyntacticException {
-		accept(TokenKind.IDENTIFIER);
-		accept(TokenKind.LPAR);
-		
-		parseParametersPrototype();
-		
-		accept(TokenKind.RPAR);
-		
-		if (currentToken.getKind() == TokenKind.BE) {
-			parseProcedureDefinitonTail();
-		}
-		else {
-			parseFunctionDefinitionTail();
-		}
-	}
 
 	/**
 	 * equalExpression ::= (numberBoolExpression |(arithmeticExpression op_rel
@@ -497,6 +496,10 @@ public class Parser {
 		else {
 			throw new SyntacticException(null, currentToken);
 		}
+	}
+
+	private void parseExpression() {
+		acceptIt();
 	}
 
 	/**
@@ -846,7 +849,7 @@ public class Parser {
 
 			acceptIt();
 		}
-		
+
 		accept(TokenKind.RPAR);
 	}
 
@@ -901,12 +904,8 @@ public class Parser {
 	 */
 	private void parseResultIsCommand() throws SyntacticException {
 		accept(TokenKind.RESULTIS);
-		
-		parseExpression();
-	}
 
-	private void parseExpression() {
-		acceptIt();
+		parseExpression();
 	}
 
 	/**
@@ -951,7 +950,7 @@ public class Parser {
 		if (currentToken.getKind() == TokenKind.GLOBAL) {
 			acceptIt();
 		}
-		
+
 		if (currentToken.getKind() == TokenKind.INT) {
 			parseIntVariableDefinition();
 		}

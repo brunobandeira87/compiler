@@ -27,6 +27,8 @@ public class Parser {
     public Parser() {
         // Initializes the scanner object
         this.scanner = new BCPLScanner();
+        
+        this.currentToken = this.scanner.getNextToken();
     }
 
     /**

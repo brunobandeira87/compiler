@@ -119,15 +119,16 @@ public class Token {
         BOOLEXP = 54,
         NUMBERBOOLEXP = 55,
         ARITHEXP = 56,
-                NUMBEREXP = 57,
-                ANDEXP = 58,
-                OREXP = 59,
-                NOTEQUALEXP = 60,
-                EQUALEXP = 61,
-                ANDLOGICAL = 62,
-                ORLOGICAL = 63,
-                EQUALLOGICAL = 64,
-                NOTEQUALLOGICAL = 65;
+	    NUMBEREXP = 57,
+	    ANDEXP = 58,
+	    OREXP = 59,
+	    NOTEQUALEXP = 60,
+	    EQUALEXP = 61,
+	    ANDLOGICAL = 62,
+	    ORLOGICAL = 63,
+	    EQUALLOGICAL = 64,
+	    NOTEQUALLOGICAL = 65,
+		EOF = 66;
                
         
             

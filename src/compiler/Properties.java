@@ -10,6 +10,6 @@ package compiler;
 public interface Properties {
 
 	// The source code file
-	public static final String sourceCodeLocation = "program1.extension";
+	public static final String sourceCodeLocation = "examples/program1.bcpl";
 	
 }

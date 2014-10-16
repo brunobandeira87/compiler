@@ -29,7 +29,16 @@ public class BCPLScanner extends Scanner {
 
 		currentKind = scanToken();
 
-		return new Token(currentKind, getCurrentSpelling(), line, column);
+		Token token;
+
+		if (currentKind == TokenKind.COMMENT) {
+			token = getNextToken();
+		}
+		else {
+			token = new Token(currentKind, getCurrentSpelling(), line, column);
+		}
+
+		return token;
 	}
 
 	public TokenKind lookupReservedWord(String word) {
@@ -200,6 +209,7 @@ public class BCPLScanner extends Scanner {
 				else {
 					return TokenKind.OP_ARITMETIC;
 				}
+
 			case ':':
 				getNextChar();
 
@@ -217,6 +227,7 @@ public class BCPLScanner extends Scanner {
 				else {
 					return TokenKind.OP_RELATION;
 				}
+
 			case '=':
 				getNextChar();
 
@@ -228,6 +239,7 @@ public class BCPLScanner extends Scanner {
 				else {
 					return TokenKind.OP_ATTR;
 				}
+
 			case '(':
 				getNextChar();
 

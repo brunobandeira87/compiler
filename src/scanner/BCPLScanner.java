@@ -200,7 +200,6 @@ public class BCPLScanner extends Scanner {
 				else {
 					return TokenKind.OP_ARITMETIC;
 				}
-
 			case ':':
 				getNextChar();
 
@@ -218,7 +217,6 @@ public class BCPLScanner extends Scanner {
 				else {
 					return TokenKind.OP_RELATION;
 				}
-
 			case '=':
 				getNextChar();
 
@@ -230,7 +228,6 @@ public class BCPLScanner extends Scanner {
 				else {
 					return TokenKind.OP_ATTR;
 				}
-
 			case '(':
 				getNextChar();
 

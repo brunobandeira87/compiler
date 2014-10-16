@@ -61,7 +61,7 @@ public class Token {
 	public int getColumn() {
 		return column;
 	}
-	public static final byte 
+	public static final int 
         IDENTIFIER = 0,
         NUMBER = 1,
         OP_ATTR = 2,
@@ -85,7 +85,38 @@ public class Token {
         LT = 20,
         LTE = 21,
         NOT = 22,
-        AND = 23;
+        AND = 23,
+        FUNCDEF = 24,
+        PROCDEF = 25,
+        VARDEF = 26,
+        VARGLODEF = 27,
+        INTVARDEF = 28,
+        BOOLVARDEF = 29,
+        VALOF = 30,
+        BE = 31,
+        RCURL = 32,
+        LCURL = 33,
+        BOOL = 34,
+        INT = 35,
+        ASGNCOM = 36,
+        IFCOM = 37,
+        WHILECOM = 38,
+        BREAKCOM = 39,
+        CONTINUECOM = 40,
+        VARDCCOM = 41,
+        CALLCOM = 42,
+        PRINTCOM = 43,
+        FUNCALLCOM = 44,
+        PROCCALLCOM = 45,
+        ADDSUBEXP = 46,
+        MULDIVEXP = 47,
+        VIRG = 48,
+        SEMICOL = 49,
+        PARCALLCOM = 50,
+        EOL = 51,
+        TRUE = 52,
+        FALSE = 53,
+        BOOLEXP = 54;
                
         
             

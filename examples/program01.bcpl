@@ -1,0 +1,3 @@
+LET myFunction() = VALOF {
+	WRITEF(10)
+}

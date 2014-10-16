@@ -116,7 +116,18 @@ public class Token {
         EOL = 51,
         TRUE = 52,
         FALSE = 53,
-        BOOLEXP = 54;
+        BOOLEXP = 54,
+        NUMBERBOOLEXP = 55,
+        ARITHEXP = 56,
+                NUMBEREXP = 57,
+                ANDEXP = 58,
+                OREXP = 59,
+                NOTEQUALEXP = 60,
+                EQUALEXP = 61,
+                ANDLOGICAL = 62,
+                ORLOGICAL = 63,
+                EQUALLOGICAL = 64,
+                NOTEQUALLOGICAL = 65;
                
         
             

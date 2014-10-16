@@ -9,24 +9,26 @@ package parser;
  */
 
 /*
-
 program ::= declarationList;
 
 declarationList ::= 'LET' definition ('AND' definition)*;
 
-definition ::= functionDefinition
-						| procedureDefinition
-						| variableDefinition;
+definition ::= callableDefinition
+		     | variableDefinition;
 
 identifierList ::= Identifier (',' Identifier)*;
 
-functionDefinition ::= Identifier '(' parametersPrototype ')' '=' 'VALOF' functionBlock;
+callableDefinition ::= Identifier '(' parametersPrototype ')' (functionDefinitionTail | procedureDefinitionTail);
+
+functionDefinitionTail ::= '=' 'VALOF' functionBlock;
+
+procedureDefinitionTail ::= 'BE' commandBlock;
+
+variableDefinition ::= ('GLOBAL')? (intVariableDefinition | boolVariableDefinition);
+
+parametersPrototype ::= (('INT' | 'BOOL')Identifier ((, 'INT' | 'BOOL')Identifier)*)*
 
 functionBlock ::= '{' commandList resultisCommand '}';
-
-procedureDefinition ::= Identifier '(' parametersPrototype ')' 'BE' commandBlock;
-
-varGlobalDefinition ::= ('GLOBAL') (intVariableDefinition | boolVariableDefinition);
 
 intVariableDefinition ::= ('INT' Identifier '=' numberExpression)*;
 
@@ -34,38 +36,32 @@ boolVariableDefinition ::= ('BOOL' Identifier '=' booleanExpression)*;
 
 commandBlock ::= '{' commandList '}';
 
-parametersPrototype ::= (('INT' | 'BOOL')Identifier ((, 'INT' | 'BOOL')Identifier)*)*
 
 parametersCallCommand ::= (Identifier (, Identifier)*)*
 
 commandList ::= command (';' command)*;
 
 command ::= assignmentCommand
-						| whileCommand
-						| ifCommand
-						| breakCommand
-						| continueCommand
-						| printCommand
-						| variableDecCommand
-						| callCommand;
-
-callCommand ::= functionCallCommand
-						| procedureCallCommand
+			| callCommand;
+			| variableDecCommand
+			| whileCommand
+			| ifCommand
+			| breakCommand
+			| continueCommand
+			| printCommand
 
 variableDecCommand ::= intVariableDefinition
-						| boolVariableDefinition
+					   | boolVariableDefinition
 
-functionCallCommand ::= Identifier '('(parametersCallCommand)*')'
+callCommand ::= Identifier '('(parametersCallCommand)*')'
 
-procedureCallCommand ::= Identifier '('(parametersCallCommand)*')'
+assignmentCommand ::= Identifier ':=' (number | booleanValue | numberExpression | functionCallCommand | Identifier);
 
 ifCommand ::= 'IF' '(' booleanExpression | booleanValue ')' commandBlock ('ELSE' commandBlock)?;
 
 whileCommand ::= 'WHILE' '(' ( booleanExpression | booleanValue ')' commandBlock;
 
 resultisCommand ::= 'RESULTIS' expression;
-
-assignmentCommand ::= Identifier ':=' (number | booleanValue | numberExpression | functionCallCommand | Identifier);
 
 breakCommand ::= 'BREAK';
 
@@ -96,8 +92,7 @@ equalExpression ::= (numberBoolExpression |(arithmeticExpression op_rel (arithme
 notEqualExpression ::= (numberBoolExpression |(arithmeticExpression op_rel (arithmeticExpression | number)) | booleanValue ) '!=' (numberBoolExpression |(arithmeticExpression op_rel (arithmeticExpression | number)) | booleanValue )
 
 booleanValue ::= 'TRUE'
-						| 'FALSE'
-
+				 | 'FALSE'
 */
 
 public class GrammarSymbols {

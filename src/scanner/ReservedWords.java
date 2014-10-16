@@ -1,3 +1,4 @@
+
 package scanner;
 
 public class ReservedWords {
@@ -26,10 +27,10 @@ public class ReservedWords {
 
 	public static final String TRUE = "TRUE";
 
+	public static final String VALOF = "VALOF";
+
 	public static final String WHILE = "WHILE";
 
 	public static final String WRITEF = "WRITEF";
-	
-	public static final String VALOF = "VALOF";
 
 }

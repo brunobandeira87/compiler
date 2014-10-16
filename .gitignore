@@ -1,0 +1,8 @@
+*.class
+*.coverage
+.ant_targets
+source-formatter.properties
+bin/
+classes/
+coverage/
+test-classes/

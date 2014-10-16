@@ -1,11 +1,12 @@
-package parser;
 
+package parser;
 
 import scanner.BCPLScanner;
 import scanner.LexicalException;
 import scanner.Scanner;
 import scanner.Token;
 import scanner.TokenKind;
+
 import util.AST.AST;
 
 /**
@@ -18,1019 +19,1010 @@ import util.AST.AST;
  */
 public class Parser {
 
-    // The current token
-    private Token currentToken = null;
-    // The scanner
-    private Scanner scanner = null;
+	/**
+	 * Parser constructor
+	 */
+	public Parser() {
 
-    /**
-     * Parser constructor
-     */
-    public Parser() {
-        // Initializes the scanner object
-        this.scanner = new BCPLScanner();
-        
-        try {
+		this.scanner = new BCPLScanner();
+
+		try {
 			this.currentToken = this.scanner.getNextToken();
-		} catch (LexicalException e) {
-			// TODO Auto-generated catch block
+		}
+		catch (LexicalException e) {
 			e.printStackTrace();
 		}
-    }
+	}
 
-    /**
-     * Veririfes if the current token kind is the expected one
-     *
-     * @param kind
-     * @throws SyntacticException
-     */ //TODO
-    private void accept(TokenKind kind) throws SyntacticException {
-		// If the current token kind is equal to the expected
-        if(this.currentToken.getKind() == kind){
-        // Gets next token
-            try {
+	/**
+	 * Verifies if the source program is syntactically correct
+	 *
+	 * @throws SyntacticException
+	 */
+	public AST parse() throws SyntacticException {
+		this.parseProgram();
+
+		return null;
+	}
+
+	/**
+	 * Veririfes if the current token kind is the expected one
+	 *
+	 * @param kind
+	 * @throws SyntacticException
+	 */
+	private void accept(TokenKind kind) throws SyntacticException {
+		if (this.currentToken.getKind() == kind) {
+			try {
 				this.currentToken = this.scanner.getNextToken();
-			} catch (LexicalException e) {
-				// TODO Auto-generated catch block
+			}
+			catch (LexicalException e) {
 				e.printStackTrace();
 			}
-        }
-        // If not
-        else{
-        // Raises an exception
-            throw new SyntacticException("Unexpected ", currentToken);
-        }
-    }
+		}
+		else {
+			throw new SyntacticException("Unexpected ", currentToken);
+		}
+	}
 
-    /**
-     * Gets next token
-     */ //TODO
-    private void acceptIt() {
-        try {
+	/**
+	 * Gets next token
+	 */
+	private void acceptIt() {
+		try {
 			this.currentToken = this.scanner.getNextToken();
-		} catch (LexicalException e) {
-			// TODO Auto-generated catch block
+		}
+		catch (LexicalException e) {
 			e.printStackTrace();
 		}
-    }
+	}
 
-    /**
-     * Verifies if the source program is syntactically correct
-     *
-     * @throws SyntacticException
-     */ //TODO
-    public AST parse() throws SyntacticException {
-        this.parseProgram();
-        return null;
-    }
+	/**
+	 * addSubExpression ::= (Identifier | number) ('+' | '-') (Identifier |
+	 * number)
+	 */
+	private void parseAddSubExpression() throws SyntacticException {
+		switch (this.currentToken.getKind()) {
+			case NUMBER:
+			case IDENTIFIER:
+				acceptIt();
+				accept(TokenKind.OP_ARITMETIC);
 
-    //program                  ::=    declarationList;
-    private void parseProgram() throws SyntacticException {
-        parseDeclarationList();
-    }
+				switch (this.currentToken.getKind()) {
+					case NUMBER:
+					case IDENTIFIER:
+						acceptIt();
 
-    /*
-     declarationList          ::=    'LET' definition ('AND' definition)*;
-                                |      varGlobalDefinition
-        
-     */
-    private void parseDeclarationList() throws SyntacticException {
-        switch(this.currentToken.getKind()){
-            case LET:
-                acceptIt();
-
-                parseDefinition();
-
-                while(this.currentToken.getKind() == TokenKind.AND){
-                    acceptIt();
-                    
-                    parseDefinition();
-                }
-
-                break;
-            default:
-            	parseVarGlobalDefinition();
-        }
-    }
-    /*
-     definition               ::=    functionDefinition
-                                |    procedureDefinition
-                                |    variableDefinition;
-     */
-
-    private void parseDefinition() throws SyntacticException {
-        
-        switch(this.currentToken.getKind()){
-        
-            case FUNCDEF:
-                parseFunctionDefinition();
-            break;
-                
-            case PROCDEF:
-                parseProcedureDefiniton();
-            break;
-                
-            case VARDEF:
-                parseVariableDefinition();
-            break;
-                
-            default:
-                throw new SyntacticException(null, currentToken);
-                
-            
-        }
-        
-    }
-
-    /*
-     varGlobalDefinition      ::=    ('GLOBAL') (intVariableDefinition | boolVariableDefinition);
-     */
-    private void parseVarGlobalDefinition() throws SyntacticException {
-        accept(TokenKind.GLOBAL);
-
-        switch(this.currentToken.getKind()){
-            case INT:
-                parseIntVariableDefinition();
-
-                break;
-            default:
-            	parseBoolVariableDefinition();
-        }
-    }
-
-    /*
-     functionDefinition       ::=    Identifier '(' parametersPrototype ')' '=' 'VALOF' functionBlock;
-        
-     */
-
-    private void parseFunctionDefinition() throws SyntacticException{
-        if(this.currentToken.getKind() == TokenKind.IDENTIFIER){
-            acceptIt();
-            accept(TokenKind.LPAR);
-            parseParametersPrototype();
-            accept(TokenKind.RPAR);
-            accept(TokenKind.EQUAL);
-            accept(TokenKind.VALOF);
-            parseFunctionBlock();
-                
-            
-        }
-        else{
-            throw new SyntacticException(null, currentToken);
-        }
-    }
-
-    /*
-     procedureDefinition      ::=    Identifier '(' parametersPrototype ')' 'BE' commandBlock;
-     */
-    private void parseProcedureDefiniton() throws SyntacticException {
-        
-        if(this.currentToken.getKind() == TokenKind.IDENTIFIER){
-            acceptIt();
-            accept(TokenKind.LPAR);
-            parseParametersPrototype();
-            accept(TokenKind.RPAR);
-            accept(TokenKind.EQUAL);
-            accept(TokenKind.BE);
-            parseCommandBlock();
-         
-        }
-        else{
-            throw new SyntacticException(null, currentToken);
-        }
-        
-    }
-    /*
-     variableDefinition      ::=    intVariableDefinition
-     |       
-     */
-
-    private void parseVariableDefinition() throws SyntacticException {
-        
-        switch(this.currentToken.getKind()){
-            
-            case BOOLVARDEF:
-                parseBoolVariableDefinition();
-            break;
-                
-            case INTVARDEF:
-                parseIntVariableDefinition();
-            break;
-                
-            default:
-                throw new SyntacticException(null, currentToken);
-                
-        }
-        
-        
-        
-    }
-
-    /*
-     functionBlock            ::=    '{' commandList resultisCommand '}';
-     */
-    private void parseFunctionBlock() throws SyntacticException{
-        if(this.currentToken.getKind() == TokenKind.RCURL){
-            acceptIt();
-            parseCommandList();
-            parseResultIsCommand();
-            accept(TokenKind.LCURL);
-        }
-        else{
-            throw new SyntacticException(null, currentToken);
-        }
-    }
-
-    /*
-     parametersPrototype      ::=   (('INT' | 'BOOL') Identifier ((, 'INT' | 'BOOL') Identifier)*)
-     */
-    private void parseParametersPrototype() throws SyntacticException {
-        
-        switch(this.currentToken.getKind()){
-            case INT:
-            case BOOL:
-                acceptIt();
-                parseIdentifier();
-                while(this.currentToken.getKind() == TokenKind.VIRG){
-                    acceptIt();
-                    switch(this.currentToken.getKind()){
-                        case INT:
-                        case BOOL:
-                            acceptIt();
-                        break;
-					default:
 						break;
-                    }
-                    parseIdentifier();
-                }
-		default:
-			break;
-                
-        }
-        
-    }
-    
-    /*
-    Precisa da classe Scanner implementada
-    */
-    
-    private void parseIdentifier() throws SyntacticException{
-        if(this.currentToken.getKind() == TokenKind.IDENTIFIER){
-            
-        }
-            
-    }
 
-    /*
-     intVariableDefinition    ::=    ('INT' Identifier '=' numberExpression)*;
-     */
-    private void parseIntVariableDefinition() throws SyntacticException {
-        while(this.currentToken.getKind() == TokenKind.INT){
-            acceptIt();
-            parseIdentifier();
-            accept(TokenKind.EQUAL);
-            parseNumberExpression();
-            
-        }
-        
-    }
+					default:
+						throw new SyntacticException(null, currentToken);
+				}
 
-    /*
-     boolVariableDefinition   ::=    ('BOOL' Identifier '=' booleanExpression)*;
-     */
-    private void parseBoolVariableDefinition() throws SyntacticException {
-        while(this.currentToken.getKind() == TokenKind.BOOL){
-            acceptIt();
-            parseIdentifier();
-            accept(TokenKind.EQUAL);
-            parseBooleanExpression();
-        }
-    }
+				break;
 
-    /*
-     commandBlock             ::=    '{' commandList '}';
-     */
-    private void parseCommandBlock() throws SyntacticException {
-        if(this.currentToken.getKind() == TokenKind.RCURL){
-            acceptIt();
-            parseCommandList();
-            accept(TokenKind.LCURL);
-        }
-        else{
-            throw new SyntacticException(null, currentToken);
-        }
-    }
+			default:
+				throw new SyntacticException(null, currentToken);
+		}
+	}
 
-    /*
-     parametersCallCommand    ::=   (Identifier (, Identifier)*)
-     */
-    private void parseParametersCallCommand() throws SyntacticException {
-        if(this.currentToken.getKind() == TokenKind.IDENTIFIER){
-            parseIdentifier();
-            while(this.currentToken.getKind() == TokenKind.VIRG){
-                acceptIt();
-                parseIdentifier();
-            }
-        }
-        else{
-            throw new SyntacticException(null, currentToken);
-        }
-    }
+	/**
+	 * andExpression ::= ( numberBoolExpression |(arithmeticExpression op_rel
+	 * arithmeticExpression) | booleanValue ) '&&' ( numberBoolExpression
+	 * |(arithmeticExpression op_rel arithmeticExpression) | booleanValue)
+	 */
+	private void parseAndExpression() throws SyntacticException {
+		switch (this.currentToken.getKind()) {
+			case NUMBERBOOLEXP:
+				parseNumberBoolExpression();
+				break;
+			case ARITHEXP:
+				parseArithmeticBoolExpression();
 
-    /*
-     commandList              ::=    command (';' command)*;
-     */
-    private void parseCommandList() throws SyntacticException {
-        parseCommand();
-        while(this.currentToken.getKind() == TokenKind.SEMICOL ){
-            acceptIt();
-            parseCommand();
-        }
-    }
+				accept(TokenKind.OP_RELATION);
 
-    /*
-     command                  ::=    assignmentCommand
-     |    whileCommand
-     |    ifCommand
-     |    breakCommand
-     |    continueCommand
-     |    printCommand
-     |    variableDecCommand
-     |    callCommand;
-     */
-    private void parseCommand() throws SyntacticException {
-        
-        switch(this.currentToken.getKind()){
-            
-            case ASGNCOM:
-                parseAssignmentCommand();
-            break;
-                
-            case WHILECOM:
-                parseWhileCommand();
-            break;
-                
-            case IFCOM:
-                parseIfCommand();
-            break;
-            
-            case CONTINUECOM:
-                parseContinueCommand();
-            break;
-                
-            case BREAKCOM:
-                parseBreakCommand();
-            break;
-                
-            case PRINTCOM:
-                parsePrintCommand();
-            break;
-                
-            case CALLCOM:
-                parseCallCommand();
-            break;
-                
-            case VARDCCOM:
-                parseVariableDecCommand();
-            break;
-                
-            default:
-                throw new SyntacticException(null, currentToken);
-                
-            
-                
-        }
-    }
+				parseArithmeticBoolExpression();
 
-    /*
-     callCommand              ::=     functionCallCommand
-     |      procedureCallCommand
-        
-     */
-    private void parseCallCommand() throws SyntacticException{
-        switch(this.currentToken.getKind()){
-            case FUNCALLCOM:
-                parseFunctionCallCommand();
-            break;
-                
-            case PROCCALLCOM:
-                parseProcedureCallCommand();
-            break;
-                
-            default:
-                throw new SyntacticException(null, currentToken);
-        }
-    }
+				break;
+			case TRUE:
+			case FALSE:
+				acceptIt();
+				break;
+			default:
+				throw new SyntacticException(null, currentToken);
+		}
 
-    /*
-     variableDecCommand       ::=     intVariableDefinition
-     |      boolVariableDefinition
-     */
-    private void parseVariableDecCommand() throws SyntacticException {
-        switch(this.currentToken.getKind()){
-            case INTVARDEF:
-                parseIntVariableDefinition();
-            break;
-                
-            case BOOLVARDEF:
-                parseBoolVariableDefinition();
-            break;
-                
-            default:
-                throw new SyntacticException(null, currentToken);
-        }
-    }
+		if (this.currentToken.getKind() == TokenKind.ANDLOGICAL) {
+			acceptIt();
 
-    /*
-     functionCallCommand      ::=    Identifier '('(parametersCallCommand)*')'
-     */
-    private void parseFunctionCallCommand() throws SyntacticException {
-        if(this.currentToken.getKind() == TokenKind.IDENTIFIER){
-            acceptIt();
-            accept(TokenKind.RPAR);
-            while(this.currentToken.getKind() == TokenKind.PARCALLCOM){
-                parseParametersCallCommand();
-            }
-        }
-        else{
-            throw new SyntacticException(null, currentToken);
-        }
-    }
-    /*
-     procedureCallCommand     ::=    Identifier '('(parametersCallCommand)*')'
-        
-     */
+			switch (this.currentToken.getKind()) {
+				case NUMBERBOOLEXP:
+					parseNumberBoolExpression();
+					break;
+				case ARITHEXP:
+					parseArithmeticBoolExpression();
 
-    private void parseProcedureCallCommand() throws SyntacticException {
-        if(this.currentToken.getKind() == TokenKind.IDENTIFIER){
-            acceptIt();
-            accept(TokenKind.RPAR);
-            while(this.currentToken.getKind() == TokenKind.PARCALLCOM){
-                parseParametersCallCommand();
-            }
-        }
-        else{
-            throw new SyntacticException(null, currentToken);
-        }
-    }
+					accept(TokenKind.OP_RELATION);
 
-    /*
-     ifCommand                ::=    'IF' '(' booleanExpression | booleanValue ')' commandBlock ('ELSE' commandBlock)?;
-        
-     */
-    private void parseIfCommand()  throws SyntacticException{
-        if(this.currentToken.getKind() == TokenKind.IF){
-            acceptIt();
-            accept(TokenKind.RPAR);
-            switch(this.currentToken.getKind()){
-                case BOOLEXP:
-                    parseBooleanExpression();
-                break;
-                    
-                case TRUE:
-                case FALSE:
-                    acceptIt();
-                    parseCommandBlock();
-                break;
-                
-                default:
-                    throw new SyntacticException(null, currentToken);
-            }
-            if(this.currentToken.getKind() == TokenKind.ELSE){
-                acceptIt();
-                parseCommandBlock();
-            }else if(this.currentToken.getKind() == TokenKind.EOL){
-                acceptIt();
-            }
-            else{
-                throw new SyntacticException(null, currentToken);
-            }
-        }
-        else{
-            throw new SyntacticException(null, currentToken);
-        }
-    }
+					parseArithmeticBoolExpression();
+					break;
+				case TRUE:
+				case FALSE:
+					acceptIt();
+					break;
+				default:
+					throw new SyntacticException(null, currentToken);
+			}
+		}
+		else {
+			throw new SyntacticException(null, currentToken);
+		}
+	}
 
-    /*
-     whileCommand             ::=    'WHILE' '(' ( booleanExpression | booleanValue ')' commandBlock;
-     */
-    private void parseWhileCommand() throws SyntacticException {
-        if(this.currentToken.getKind() == TokenKind.WHILE){
-            acceptIt();
-            accept(TokenKind.RPAR);
-            switch(this.currentToken.getKind()){
-                case BOOLEXP:
-                    parseBooleanExpression();
-                break;
-                    
-                case TRUE:
-                case BOOL:
-                    acceptIt();
-                break;
-                    
-                    
-                default:
-                    throw new SyntacticException(null, currentToken);
-            }
-            
-            accept(TokenKind.LPAR);
-            parseCommandBlock();
-        }
-        else{
-            throw new SyntacticException(null, currentToken);
-        }
-    }
+	/**
+	 * arithBoolExpression ::= arithmeticExpression | numberBoolExpression
+	 */
+	private void parseArithmeticBoolExpression() throws SyntacticException {
+		switch (this.currentToken.getKind()) {
+			case NUMBERBOOLEXP:
+				parseNumberBoolExpression();
 
-    /*
-     resultisCommand          ::=    'RESULTIS' expression;
-     */
-    private void parseResultIsCommand() throws SyntacticException {
-        if(this.currentToken.getKind() == TokenKind.RESULTIS){
-            acceptIt();
-            switch(this.currentToken.getKind()){
-                case NUMBER:
-                case TRUE:
-                case FALSE:
-                    acceptIt();
-                break;
-                    
-                default:
-                    throw new SyntacticException(null, currentToken);
-            }
-        }
-        else{
-            throw new SyntacticException(null, currentToken);
-        }
-        
-    }
+				break;
+			case ARITHEXP:
+				parseArithmeticExpression();
 
-    /*
-     assignmentCommand        ::=    Identifier ':=' (number | booleanValue | numberExpression | functionCallCommand | Identifier);
-     */
-    private void parseAssignmentCommand() throws SyntacticException{
-        if(this.currentToken.getKind() == TokenKind.IDENTIFIER){
-            acceptIt();
-            accept(TokenKind.EQUAL);
-            switch(this.currentToken.getKind()){
-                case NUMBER:
-                case TRUE:
-                case FALSE:
-                case IDENTIFIER:
-                    acceptIt();
-                break;
-                    
-                case FUNCALLCOM:
-                    parseFunctionCallCommand();
-                break;
-                    
-                case NUMBEREXP:
-                    parseNumberExpression();
-                break;
-                    
-                default:
-                    throw new SyntacticException(null, currentToken);
-            }
-        }
-        
-        else{
-            throw new SyntacticException(null, currentToken);
-        }
-        
-    }
-    /*
-     breakCommand             ::=    'BREAK';
-        
-     */
+				break;
+			default:
+				throw new SyntacticException(null, currentToken);
+		}
+	}
 
-    private void parseBreakCommand() throws SyntacticException {
-        if(this.currentToken.getKind() == TokenKind.BREAK){
-            acceptIt();
-        }
-        else{
-            throw new SyntacticException(null, currentToken);
-        }
-        
-        
-    }
-    
+	/**
+	 * arithmeticExpression ::= multDivExpression | addSubExpression
+	 */
+	private void parseArithmeticExpression() throws SyntacticException {
+		switch (this.currentToken.getKind()) {
+			case MULDIVEXP:
+				parseMultDivExpression();
 
-    /*
-     continueCommand          ::=    'CONTINUE';
-     */
-    private void parseContinueCommand() throws SyntacticException {
-        if(this.currentToken.getKind() == TokenKind.CONTINUE){
-            acceptIt();
-        }
-        else{
-            throw new SyntacticException(null, currentToken);
-        }
-        
-                
-    }
+				break;
+			case ADDSUBEXP:
+				parseAddSubExpression();
 
-    /*
-     printCommand             ::=    'WRITEF' '(' (Identifier)* ')';
-     */
-    private void parsePrintCommand() throws SyntacticException {
-        if(this.currentToken.getKind() == TokenKind.WRITEF){
-            acceptIt();
-            accept(TokenKind.RPAR);
-            while(this.currentToken.getKind() == TokenKind.IDENTIFIER){
-                parseIdentifier();
-            }
-        }
-        else{
-            throw new SyntacticException(null, currentToken);
-        }
-    }
+				break;
+			default:
+				throw new SyntacticException(null, currentToken);
+		}
+	}
 
-    /*
-     numberBoolExpression     ::=     (number | Identifier) Op_relation ( number | Identifier) 
-        
-     */
-    private void parseNumberBoolExpression() throws SyntacticException {
-        switch(this.currentToken.getKind()){
-            case NUMBER:
-            case IDENTIFIER:
-                acceptIt();
-                accept(TokenKind.OP_RELATION);
-                switch(this.currentToken.getKind()){
-                    case NUMBER:
-                    case IDENTIFIER:
-                        acceptIt();
-                    break;
-                    
-                    default:
-                        throw new SyntacticException(null, currentToken);
-                }
-            break;
-            
-            default:
-                throw new SyntacticException(null, currentToken);
-        }
-    }
+	/**
+	 * assignmentCommand ::= Identifier ':=' (number | booleanValue |
+	 * numberExpression | functionCallCommand | Identifier);
+	 */
+	private void parseAssignmentCommand() throws SyntacticException {
+		if (this.currentToken.getKind() == TokenKind.IDENTIFIER) {
+			acceptIt();
+			accept(TokenKind.EQUAL);
 
-    /*
-     arithBoolExpression      ::= arithmeticExpression | numberBoolExpression
-     */
-    private void parseArithmeticBoolExpression() throws SyntacticException {
-        switch(this.currentToken.getKind()){
-            
-            case NUMBERBOOLEXP:
-                parseNumberBoolExpression();
-            break;
-                
-            case ARITHEXP:
-                parseArithmeticExpression();
-            break;
-                
-            default:
-                throw new SyntacticException(null, currentToken);
-        }
-    }
+			switch (this.currentToken.getKind()) {
+				case NUMBER:
+				case TRUE:
+				case FALSE:
+				case IDENTIFIER:
+					acceptIt();
 
-    /*
-     booleanExpression        ::= ('!')? (  andExpression | orExpression  | equalExpresion | notEqualExpression )
-        
-     */
-    private void parseBooleanExpression() throws SyntacticException {
-        if(this.currentToken.getKind() == TokenKind.NOT){
-            acceptIt();
-        }
-        switch(this.currentToken.getKind()){
-            case ANDEXP:
-                parseAndExpression();
-            break;
-                
-            case OREXP:
-                parseOrExpression();                        
-            break;
-                
-            case EQUALEXP:
-                parseEqualExpression();
-            break;
-                
-            case NOTEQUALEXP:
-                parseNotEqualExpression();
-            break;
-                
-            default:
-                throw new SyntacticException(null, currentToken);
-        }
-    }
+					break;
+				case FUNCALLCOM:
+					parseFunctionCallCommand();
 
-    /*
-     numberExpression         ::=  (multDivExpression)? arithmeticExpression
-        
-     */
-    private void parseNumberExpression() throws SyntacticException {
-        if(this.currentToken.getKind() == TokenKind.MULDIVEXP){
-            parseMultDivExpression();
-        }
-        if(this.currentToken.getKind() == TokenKind.ARITHEXP){
-            parseArithmeticExpression();
-        }
-        else{
-            throw new SyntacticException(null, currentToken);
-        }
-        
-        
-        
-    }
+					break;
+				case NUMBEREXP:
+					parseNumberExpression();
 
-    /*
-     arithmeticExpression     ::=  multDivExpression
-     |   addSubExpression
-     */
-    private void parseArithmeticExpression() throws SyntacticException {
-        switch(this.currentToken.getKind()){
-        
-            case MULDIVEXP:
-                parseMultDivExpression();
-            break;
-                
-            case ADDSUBEXP:
-                parseAddSubExpression();
-            break;
-                
-            default:
-                throw new SyntacticException(null, currentToken);
-                
-        }
-    }
+					break;
+				default:
+					throw new SyntacticException(null, currentToken);
+			}
+		}
 
-    /*
-     multDivExpression        ::=  (Identifier | number) ('/' | '*') (Identifier | number)
-     */
-    private void parseMultDivExpression() throws SyntacticException {
-        switch(this.currentToken.getKind()){
-            case NUMBER:
-            case IDENTIFIER:
-                acceptIt();
-                accept(TokenKind.OP_ARITMETIC);
-                switch(this.currentToken.getKind()){
-                    case NUMBER:
-                    case IDENTIFIER:
-                        acceptIt();
-                    
-                    break;
-                    
-                    default:
-                        throw new SyntacticException(null, currentToken);
-                }
-            break;
-                
-            
-            default:
-                throw new SyntacticException(null, currentToken);
-        }
-    }
+		else {
+			throw new SyntacticException(null, currentToken);
+		}
+	}
 
-    /*
-     addSubExpression         ::=  (Identifier | number) ('+' | '-') (Identifier | number)                         
-     */
-    private void parseAddSubExpression() throws SyntacticException {
-              switch(this.currentToken.getKind()){
-            case NUMBER:
-            case IDENTIFIER:
-                acceptIt();
-                accept(TokenKind.OP_ARITMETIC);
-                switch(this.currentToken.getKind()){
-                    case NUMBER:
-                    case IDENTIFIER:
-                        acceptIt();
-                    
-                    break;
-                    
-                    default:
-                        throw new SyntacticException(null, currentToken);
-                }
-            break;
-                
-            
-            default:
-                throw new SyntacticException(null, currentToken);
-        }
-    }
+	/**
+	 * booleanExpression ::= ('!')? ( andExpression | orExpression |
+	 * equalExpresion | notEqualExpression )
+	 */
+	private void parseBooleanExpression() throws SyntacticException {
+		if (this.currentToken.getKind() == TokenKind.NOT) {
+			acceptIt();
+		}
 
-    /*
-     andExpression            ::=  ( numberBoolExpression |(arithmeticExpression op_rel arithmeticExpression) | booleanValue ) '&&' 
-     ( numberBoolExpression |(arithmeticExpression op_rel arithmeticExpression) | booleanValue)
-     */
-    private void parseAndExpression() throws SyntacticException {
-        switch(this.currentToken.getKind()){
-            
-            case NUMBERBOOLEXP:
-                parseNumberBoolExpression();
-            break;
-                
-            case ARITHEXP:
-                parseArithmeticBoolExpression();
-                accept(TokenKind.OP_RELATION);
-                parseArithmeticBoolExpression();
-            break;
-                
-            case TRUE:
-            case FALSE:
-                acceptIt();
-            break;
-                
-            default:
-                throw new SyntacticException(null, currentToken);
-                
-                
-        }
-        if(this.currentToken.getKind() == TokenKind.ANDLOGICAL){
-            acceptIt();
-            
-            switch(this.currentToken.getKind()){
-                case NUMBERBOOLEXP:
-                    parseNumberBoolExpression();
-                break;
-                
-                case ARITHEXP:
-                    parseArithmeticBoolExpression();
-                    accept(TokenKind.OP_RELATION);
-                    parseArithmeticBoolExpression();
-                break;
-                
-                case TRUE:
-                case FALSE:
-                    acceptIt();
-                break;
+		switch (this.currentToken.getKind()) {
+			case ANDEXP:
+				parseAndExpression();
 
-                default:
-                    throw new SyntacticException(null, currentToken);
-            }
-        }
-        else{
-            throw new SyntacticException(null, currentToken);
-        }
-    }
+				break;
+			case OREXP:
+				parseOrExpression();
 
-    /*
-     orExpression             ::=  ( numberBoolExpression |(arithmeticExpression op_rel (arithmeticExpression | number)) | booleanValue ) 
-     '||' ( numberBoolExpression |(arithmeticExpression op_rel (arithmeticExpression | number)) | booleanValue )
-        
-     */
-    private void parseOrExpression() throws SyntacticException {
-        switch(this.currentToken.getKind()){
-            
-            case NUMBERBOOLEXP:
-                parseNumberBoolExpression();
-            break;
-                
-            case ARITHEXP:
-                parseArithmeticBoolExpression();
-                accept(TokenKind.OP_RELATION);
-                parseArithmeticBoolExpression();
-            break;
-                
-            case TRUE:
-            case FALSE:
-                acceptIt();
-            break;
-                
-            default:
-                throw new SyntacticException(null, currentToken);
-                
-                
-        }
-        if(this.currentToken.getKind() == TokenKind.ORLOGICAL){
-            acceptIt();
-            
-            switch(this.currentToken.getKind()){
-                case NUMBERBOOLEXP:
-                    parseNumberBoolExpression();
-                break;
-                
-                case ARITHEXP:
-                    parseArithmeticBoolExpression();
-                    accept(TokenKind.OP_RELATION);
-                    parseArithmeticBoolExpression();
-                break;
-                
-                case TRUE:
-                case FALSE:
-                    acceptIt();
-                break;
+				break;
+			case EQUALEXP:
+				parseEqualExpression();
 
-                default:
-                    throw new SyntacticException(null, currentToken);
-            }
-        }
-        else{
-            throw new SyntacticException(null, currentToken);
-        }
-    }
+				break;
+			case NOTEQUALEXP:
+				parseNotEqualExpression();
 
-    /*
-     equalExpression          ::=  (numberBoolExpression |(arithmeticExpression op_rel (arithmeticExpression | number)) | booleanValue  )
-     '==' (numberBoolExpression |(arithmeticExpression op_rel (arithmeticExpression | number)) | booleanValue )
-     */
-    private void parseEqualExpression() throws SyntacticException {
-        switch(this.currentToken.getKind()){
-            
-            
-            case NUMBERBOOLEXP:
-                parseNumberBoolExpression();
-            break;
-                
-            case ARITHEXP:
-                parseArithmeticBoolExpression();
-                accept(TokenKind.OP_RELATION);
-                parseArithmeticBoolExpression();
-            break;
-                
-            case TRUE:
-            case FALSE:
-                acceptIt();
-            break;
-                
-            default:
-                throw new SyntacticException(null, currentToken);
-                
-                
-        }
-        if(this.currentToken.getKind() == TokenKind.EQUALLOGICAL){
-            acceptIt();
-            
-            switch(this.currentToken.getKind()){
-                case NUMBERBOOLEXP:
-                    parseNumberBoolExpression();
-                break;
-                
-                case ARITHEXP:
-                    parseArithmeticBoolExpression();
-                    accept(TokenKind.OP_RELATION);
-                    parseArithmeticBoolExpression();
-                break;
-                
-                case TRUE:
-                case FALSE:
-                    acceptIt();
-                break;
+				break;
+			default:
+				throw new SyntacticException(null, currentToken);
+		}
+	}
 
-                default:
-                    throw new SyntacticException(null, currentToken);
-            }
-        }
-        else{
-            throw new SyntacticException(null, currentToken);
-        }
-    }
+	/**
+	 * boolVariableDefinition ::= ('BOOL' Identifier '=' booleanExpression)*;
+	 */
+	private void parseBoolVariableDefinition() throws SyntacticException {
+		while (this.currentToken.getKind() == TokenKind.BOOL) {
+			acceptIt();
 
-    /*
-     notEqualExpression       ::=  (numberBoolExpression |(arithmeticExpression op_rel (arithmeticExpression | number)) | booleanValue ) 
-    '!=' (numberBoolExpression |(arithmeticExpression op_rel (arithmeticExpression | number)) | booleanValue )
-     */
-    private void parseNotEqualExpression() throws SyntacticException {
-        switch(this.currentToken.getKind()){
-            case NUMBERBOOLEXP:
-                parseNumberBoolExpression();
-            break;
-                
-            case ARITHEXP:
-                parseArithmeticBoolExpression();
-                accept(TokenKind.OP_RELATION);
-                parseArithmeticBoolExpression();
-            break;
-                
-            case TRUE:
-            case FALSE:
-                acceptIt();
-            break;
-                
-            default:
-                throw new SyntacticException(null, currentToken);
-        }
+			accept(TokenKind.IDENTIFIER);
 
-        if(this.currentToken.getKind() == TokenKind.NOTEQUALLOGICAL){
-            acceptIt();
-            
-            switch(this.currentToken.getKind()){
-                case NUMBERBOOLEXP:
-                    parseNumberBoolExpression();
-                break;
-                
-                case ARITHEXP:
-                    parseArithmeticBoolExpression();
-                    accept(TokenKind.OP_RELATION);
-                    parseArithmeticBoolExpression();
-                break;
-                
-                case TRUE:
-                case FALSE:
-                    acceptIt();
-                break;
+			accept(TokenKind.EQUAL);
 
-                default:
-                    throw new SyntacticException(null, currentToken);
-            }
-        }
-        else{
-            throw new SyntacticException(null, currentToken);
-        }
-    }
+			parseBooleanExpression();
+		}
+	}
+
+	/**
+	 * breakCommand ::= 'BREAK';
+	 */
+	private void parseBreakCommand() throws SyntacticException {
+		if (this.currentToken.getKind() == TokenKind.BREAK) {
+			acceptIt();
+		}
+		else {
+			throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * callCommand ::= functionCallCommand | procedureCallCommand
+	 */
+	private void parseCallCommand() throws SyntacticException {
+		switch (this.currentToken.getKind()) {
+			case FUNCALLCOM:
+				parseFunctionCallCommand();
+
+				break;
+			case PROCCALLCOM:
+				parseProcedureCallCommand();
+
+				break;
+			default:
+				throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * command ::= assignmentCommand | whileCommand | ifCommand | breakCommand |
+	 * continueCommand | printCommand | variableDecCommand | callCommand;
+	 */
+	private void parseCommand() throws SyntacticException {
+		switch (this.currentToken.getKind()) {
+			case ASGNCOM:
+				parseAssignmentCommand();
+
+				break;
+			case WHILECOM:
+				parseWhileCommand();
+
+				break;
+			case IFCOM:
+				parseIfCommand();
+
+				break;
+			case CONTINUECOM:
+				parseContinueCommand();
+
+				break;
+			case BREAKCOM:
+				parseBreakCommand();
+
+				break;
+			case PRINTCOM:
+				parsePrintCommand();
+
+				break;
+			case CALLCOM:
+				parseCallCommand();
+
+				break;
+			case VARDCCOM:
+				parseVariableDecCommand();
+
+				break;
+			default:
+				throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * commandBlock ::= '{' commandList '}';
+	 */
+	private void parseCommandBlock() throws SyntacticException {
+		if (this.currentToken.getKind() == TokenKind.RCURL) {
+			acceptIt();
+
+			parseCommandList();
+
+			accept(TokenKind.LCURL);
+		}
+		else {
+			throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * commandList ::= command (';' command)*;
+	 */
+	private void parseCommandList() throws SyntacticException {
+		parseCommand();
+
+		while (this.currentToken.getKind() == TokenKind.SEMICOL) {
+			acceptIt();
+
+			parseCommand();
+		}
+	}
+
+	/**
+	 * continueCommand ::= 'CONTINUE';
+	 */
+	private void parseContinueCommand() throws SyntacticException {
+		if (this.currentToken.getKind() == TokenKind.CONTINUE) {
+			acceptIt();
+		}
+		else {
+			throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * declarationList ::= 'LET' definition ('AND' definition)*; |
+	 * varGlobalDefinition
+	 */
+	private void parseDeclarationList() throws SyntacticException {
+		switch (this.currentToken.getKind()) {
+			case LET:
+				acceptIt();
+
+				parseDefinition();
+
+				while (this.currentToken.getKind() == TokenKind.AND) {
+					acceptIt();
+
+					parseDefinition();
+				}
+
+				break;
+			default:
+				parseVarGlobalDefinition();
+		}
+	}
+
+	/**
+	 * definition ::= functionDefinition | procedureDefinition |
+	 * variableDefinition;
+	 */
+	private void parseDefinition() throws SyntacticException {
+		switch (this.currentToken.getKind()) {
+			case FUNCDEF:
+				parseFunctionDefinition();
+
+				break;
+			case PROCDEF:
+				parseProcedureDefiniton();
+
+				break;
+			case VARDEF:
+				parseVariableDefinition();
+
+				break;
+			default:
+				throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * equalExpression ::= (numberBoolExpression |(arithmeticExpression op_rel
+	 * (arithmeticExpression | number)) | booleanValue ) '=='
+	 * (numberBoolExpression |(arithmeticExpression op_rel (arithmeticExpression
+	 * | number)) | booleanValue )
+	 */
+	private void parseEqualExpression() throws SyntacticException {
+		switch (this.currentToken.getKind()) {
+			case NUMBERBOOLEXP:
+				parseNumberBoolExpression();
+
+				break;
+			case ARITHEXP:
+				parseArithmeticBoolExpression();
+
+				accept(TokenKind.OP_RELATION);
+
+				parseArithmeticBoolExpression();
+
+				break;
+			case TRUE:
+			case FALSE:
+				acceptIt();
+
+				break;
+			default:
+				throw new SyntacticException(null, currentToken);
+		}
+
+		if (this.currentToken.getKind() == TokenKind.EQUALLOGICAL) {
+			acceptIt();
+
+			switch (this.currentToken.getKind()) {
+				case NUMBERBOOLEXP:
+					parseNumberBoolExpression();
+
+					break;
+				case ARITHEXP:
+					parseArithmeticBoolExpression();
+
+					accept(TokenKind.OP_RELATION);
+
+					parseArithmeticBoolExpression();
+
+					break;
+				case TRUE:
+				case FALSE:
+					acceptIt();
+
+					break;
+				default:
+					throw new SyntacticException(null, currentToken);
+			}
+		}
+		else {
+			throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * functionBlock ::= '{' commandList resultisCommand '}';
+	 */
+	private void parseFunctionBlock() throws SyntacticException {
+		if (this.currentToken.getKind() == TokenKind.RCURL) {
+			acceptIt();
+
+			parseCommandList();
+
+			parseResultIsCommand();
+
+			accept(TokenKind.LCURL);
+		}
+		else {
+			throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * functionCallCommand ::= Identifier '('(parametersCallCommand)*')'
+	 */
+	private void parseFunctionCallCommand() throws SyntacticException {
+		if (this.currentToken.getKind() == TokenKind.IDENTIFIER) {
+			acceptIt();
+			accept(TokenKind.RPAR);
+
+			while (this.currentToken.getKind() == TokenKind.PARCALLCOM) {
+				parseParametersCallCommand();
+			}
+		}
+		else {
+			throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * functionDefinition ::= Identifier '(' parametersPrototype ')' '=' 'VALOF'
+	 * functionBlock;
+	 */
+	private void parseFunctionDefinition() throws SyntacticException {
+		if (this.currentToken.getKind() == TokenKind.IDENTIFIER) {
+			acceptIt();
+			accept(TokenKind.LPAR);
+
+			parseParametersPrototype();
+
+			accept(TokenKind.RPAR);
+			accept(TokenKind.EQUAL);
+			accept(TokenKind.VALOF);
+
+			parseFunctionBlock();
+		}
+		else {
+			throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * ifCommand ::= 'IF' '(' booleanExpression | booleanValue ')' commandBlock
+	 * ('ELSE' commandBlock)?;
+	 */
+	private void parseIfCommand() throws SyntacticException {
+		if (this.currentToken.getKind() == TokenKind.IF) {
+			acceptIt();
+			accept(TokenKind.RPAR);
+
+			switch (this.currentToken.getKind()) {
+				case BOOLEXP:
+					parseBooleanExpression();
+
+					break;
+				case TRUE:
+				case FALSE:
+					acceptIt();
+
+					parseCommandBlock();
+
+					break;
+				default:
+					throw new SyntacticException(null, currentToken);
+			}
+
+			if (this.currentToken.getKind() == TokenKind.ELSE) {
+				acceptIt();
+
+				parseCommandBlock();
+			}
+			else if (this.currentToken.getKind() == TokenKind.EOL) {
+				acceptIt();
+			}
+			else {
+				throw new SyntacticException(null, currentToken);
+			}
+		}
+		else {
+			throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * intVariableDefinition ::= ('INT' Identifier '=' numberExpression)*;
+	 */
+	private void parseIntVariableDefinition() throws SyntacticException {
+		while (this.currentToken.getKind() == TokenKind.INT) {
+			acceptIt();
+			accept(TokenKind.IDENTIFIER);
+			accept(TokenKind.EQUAL);
+
+			parseNumberExpression();
+		}
+	}
+
+	/**
+	 * multDivExpression ::= (Identifier | number) ('/' | '*') (Identifier |
+	 * number)
+	 */
+	private void parseMultDivExpression() throws SyntacticException {
+		switch (this.currentToken.getKind()) {
+			case NUMBER:
+			case IDENTIFIER:
+				acceptIt();
+				accept(TokenKind.OP_ARITMETIC);
+				switch (this.currentToken.getKind()) {
+					case NUMBER:
+					case IDENTIFIER:
+						acceptIt();
+
+						break;
+
+					default:
+						throw new SyntacticException(null, currentToken);
+				}
+
+				break;
+			default:
+				throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * notEqualExpression ::= (numberBoolExpression |(arithmeticExpression
+	 * op_rel (arithmeticExpression | number)) | booleanValue ) '!='
+	 * (numberBoolExpression |(arithmeticExpression op_rel (arithmeticExpression
+	 * | number)) | booleanValue )
+	 */
+	private void parseNotEqualExpression() throws SyntacticException {
+		switch (this.currentToken.getKind()) {
+			case NUMBERBOOLEXP:
+				parseNumberBoolExpression();
+
+				break;
+			case ARITHEXP:
+				parseArithmeticBoolExpression();
+
+				accept(TokenKind.OP_RELATION);
+
+				parseArithmeticBoolExpression();
+
+				break;
+			case TRUE:
+			case FALSE:
+				acceptIt();
+
+				break;
+			default:
+				throw new SyntacticException(null, currentToken);
+		}
+
+		if (this.currentToken.getKind() == TokenKind.NOTEQUALLOGICAL) {
+			acceptIt();
+
+			switch (this.currentToken.getKind()) {
+				case NUMBERBOOLEXP:
+					parseNumberBoolExpression();
+
+					break;
+				case ARITHEXP:
+					parseArithmeticBoolExpression();
+
+					accept(TokenKind.OP_RELATION);
+
+					parseArithmeticBoolExpression();
+
+					break;
+				case TRUE:
+				case FALSE:
+					acceptIt();
+
+					break;
+				default:
+					throw new SyntacticException(null, currentToken);
+			}
+		}
+		else {
+			throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * numberBoolExpression ::= (number | Identifier)Op_relation ( number |
+	 * Identifier)
+	 */
+	private void parseNumberBoolExpression() throws SyntacticException {
+		switch (this.currentToken.getKind()) {
+			case NUMBER:
+			case IDENTIFIER:
+				acceptIt();
+				accept(TokenKind.OP_RELATION);
+
+				switch (this.currentToken.getKind()) {
+					case NUMBER:
+					case IDENTIFIER:
+						acceptIt();
+
+						break;
+					default:
+						throw new SyntacticException(null, currentToken);
+				}
+
+				break;
+
+			default:
+				throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * numberExpression ::= (multDivExpression)? arithmeticExpression
+	 */
+	private void parseNumberExpression() throws SyntacticException {
+		if (this.currentToken.getKind() == TokenKind.MULDIVEXP) {
+			parseMultDivExpression();
+		}
+
+		if (this.currentToken.getKind() == TokenKind.ARITHEXP) {
+			parseArithmeticExpression();
+		}
+		else {
+			throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * orExpression ::= ( numberBoolExpression |(arithmeticExpression op_rel
+	 * (arithmeticExpression | number)) | booleanValue ) '||' (
+	 * numberBoolExpression |(arithmeticExpression op_rel (arithmeticExpression
+	 * | number)) | booleanValue )
+	 */
+	private void parseOrExpression() throws SyntacticException {
+		switch (this.currentToken.getKind()) {
+			case NUMBERBOOLEXP:
+				parseNumberBoolExpression();
+
+				break;
+			case ARITHEXP:
+				parseArithmeticBoolExpression();
+
+				accept(TokenKind.OP_RELATION);
+
+				parseArithmeticBoolExpression();
+
+				break;
+			case TRUE:
+			case FALSE:
+				acceptIt();
+
+				break;
+			default:
+				throw new SyntacticException(null, currentToken);
+		}
+
+		if (this.currentToken.getKind() == TokenKind.ORLOGICAL) {
+			acceptIt();
+
+			switch (this.currentToken.getKind()) {
+				case NUMBERBOOLEXP:
+					parseNumberBoolExpression();
+
+					break;
+				case ARITHEXP:
+					parseArithmeticBoolExpression();
+
+					accept(TokenKind.OP_RELATION);
+
+					parseArithmeticBoolExpression();
+
+					break;
+				case TRUE:
+				case FALSE:
+					acceptIt();
+
+					break;
+				default:
+					throw new SyntacticException(null, currentToken);
+			}
+		}
+		else {
+			throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * parametersCallCommand ::= (Identifier (, Identifier)*)
+	 */
+	private void parseParametersCallCommand() throws SyntacticException {
+		if (this.currentToken.getKind() == TokenKind.IDENTIFIER) {
+			accept(TokenKind.IDENTIFIER);
+
+			while (this.currentToken.getKind() == TokenKind.VIRG) {
+				acceptIt();
+
+				accept(TokenKind.IDENTIFIER);
+			}
+		}
+		else {
+			throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * parametersPrototype ::= (('INT' | 'BOOL')Identifier ((, 'INT' |
+	 * 'BOOL')Identifier)*)
+	 */
+	private void parseParametersPrototype() throws SyntacticException {
+		switch (this.currentToken.getKind()) {
+			case INT:
+			case BOOL:
+				acceptIt();
+				accept(TokenKind.IDENTIFIER);
+
+				while (this.currentToken.getKind() == TokenKind.VIRG) {
+					acceptIt();
+
+					switch (this.currentToken.getKind()) {
+						case INT:
+						case BOOL:
+							acceptIt();
+
+							break;
+						default:
+							break;
+					}
+
+					accept(TokenKind.IDENTIFIER);
+				}
+
+			default:
+				break;
+		}
+	}
+
+	/**
+	 * printCommand ::= 'WRITEF' '(' (Identifier)* ')';
+	 */
+	private void parsePrintCommand() throws SyntacticException {
+		if (this.currentToken.getKind() == TokenKind.WRITEF) {
+			acceptIt();
+			accept(TokenKind.RPAR);
+
+			while (this.currentToken.getKind() == TokenKind.IDENTIFIER) {
+				accept(TokenKind.IDENTIFIER);
+			}
+		}
+		else {
+			throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * procedureCallCommand ::= Identifier '('(parametersCallCommand)*')'
+	 */
+	private void parseProcedureCallCommand() throws SyntacticException {
+		if (this.currentToken.getKind() == TokenKind.IDENTIFIER) {
+			acceptIt();
+			accept(TokenKind.RPAR);
+
+			while (this.currentToken.getKind() == TokenKind.PARCALLCOM) {
+				parseParametersCallCommand();
+			}
+		}
+		else {
+			throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * procedureDefinition ::= Identifier '(' parametersPrototype ')' 'BE'
+	 * commandBlock;
+	 */
+	private void parseProcedureDefiniton() throws SyntacticException {
+		if (this.currentToken.getKind() == TokenKind.IDENTIFIER) {
+			acceptIt();
+			accept(TokenKind.LPAR);
+
+			parseParametersPrototype();
+
+			accept(TokenKind.RPAR);
+			accept(TokenKind.EQUAL);
+			accept(TokenKind.BE);
+
+			parseCommandBlock();
+		}
+		else {
+			throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * program ::= declarationList
+	 */
+	private void parseProgram() throws SyntacticException {
+		parseDeclarationList();
+	}
+
+	/**
+	 * resultisCommand ::= 'RESULTIS' expression;
+	 */
+	private void parseResultIsCommand() throws SyntacticException {
+		if (this.currentToken.getKind() == TokenKind.RESULTIS) {
+			acceptIt();
+
+			switch (this.currentToken.getKind()) {
+				case NUMBER:
+				case TRUE:
+				case FALSE:
+					acceptIt();
+
+					break;
+				default:
+					throw new SyntacticException(null, currentToken);
+			}
+		}
+		else {
+			throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * varGlobalDefinition ::= ('GLOBAL') (intVariableDefinition |
+	 * boolVariableDefinition);
+	 */
+	private void parseVarGlobalDefinition() throws SyntacticException {
+		accept(TokenKind.GLOBAL);
+
+		switch (this.currentToken.getKind()) {
+			case INT:
+				parseIntVariableDefinition();
+
+				break;
+			default:
+				parseBoolVariableDefinition();
+		}
+	}
+
+	/**
+	 * variableDecCommand ::= intVariableDefinition | boolVariableDefinition
+	 */
+	private void parseVariableDecCommand() throws SyntacticException {
+		switch (this.currentToken.getKind()) {
+			case INTVARDEF:
+				parseIntVariableDefinition();
+
+				break;
+			case BOOLVARDEF:
+				parseBoolVariableDefinition();
+
+				break;
+			default:
+				throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * variableDefinition ::= intVariableDefinition
+	 */
+	private void parseVariableDefinition() throws SyntacticException {
+		switch (this.currentToken.getKind()) {
+			case BOOLVARDEF:
+				parseBoolVariableDefinition();
+
+				break;
+			case INTVARDEF:
+				parseIntVariableDefinition();
+
+				break;
+			default:
+				throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	/**
+	 * whileCommand ::= 'WHILE' '(' ( booleanExpression | booleanValue ')'
+	 * commandBlock;
+	 */
+	private void parseWhileCommand() throws SyntacticException {
+		if (this.currentToken.getKind() == TokenKind.WHILE) {
+			acceptIt();
+			accept(TokenKind.RPAR);
+
+			switch (this.currentToken.getKind()) {
+				case BOOLEXP:
+					parseBooleanExpression();
+
+					break;
+				case TRUE:
+				case BOOL:
+					acceptIt();
+
+					break;
+				default:
+					throw new SyntacticException(null, currentToken);
+			}
+
+			accept(TokenKind.LPAR);
+
+			parseCommandBlock();
+		}
+		else {
+			throw new SyntacticException(null, currentToken);
+		}
+	}
+
+	// The current token
+
+	private Token currentToken = null;
+
+	// The scanner
+
+	private Scanner scanner = null;
 
 }

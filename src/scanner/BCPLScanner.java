@@ -1,14 +1,16 @@
+
 package scanner;
 
 import util.Arquivo;
-
 public class BCPLScanner extends Scanner {
 
 	public BCPLScanner() {
+
 		super();
 	}
 
 	public BCPLScanner(String inputFile) {
+
 		this.file = new Arquivo(inputFile);
 		this.line = 0;
 		this.column = 0;
@@ -156,7 +158,8 @@ public class BCPLScanner extends Scanner {
 					getNextChar();
 				}
 
-				TokenKind reservedWord = lookupReservedWord(getCurrentSpelling());
+				TokenKind reservedWord = lookupReservedWord(
+					getCurrentSpelling());
 
 				if (reservedWord != null) {
 					return reservedWord;
@@ -193,12 +196,13 @@ public class BCPLScanner extends Scanner {
 					while (currentChar != '\n');
 
 					getNextChar();
-					
+
 					return TokenKind.COMMENT;
 				}
 				else {
 					return TokenKind.OP_ARITMETIC;
 				}
+
 			case ':':
 				getNextChar();
 
@@ -216,6 +220,7 @@ public class BCPLScanner extends Scanner {
 				else {
 					return TokenKind.OP_RELATION;
 				}
+
 			case '=':
 				getNextChar();
 
@@ -227,6 +232,7 @@ public class BCPLScanner extends Scanner {
 				else {
 					return TokenKind.OP_ATTR;
 				}
+
 			case '(':
 				getNextChar();
 
@@ -250,7 +256,8 @@ public class BCPLScanner extends Scanner {
 			case 0:
 				return TokenKind.EOF;
 			default:
-				throw new LexicalException("Unexpected character.", currentChar, line, column);
+				throw new LexicalException(
+					"Unexpected character.", currentChar, line, column);
 		}
 	}
 

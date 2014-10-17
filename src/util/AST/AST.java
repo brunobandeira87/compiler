@@ -13,6 +13,7 @@ public abstract class AST {
 
 	public String getSpaces(int level) {
 		StringBuffer str = new StringBuffer();
+
 		while (level > 0) {
 			str.append(" ");
 			level--;

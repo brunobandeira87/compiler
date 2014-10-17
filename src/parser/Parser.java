@@ -8,6 +8,23 @@ import scanner.Token;
 import scanner.TokenKind;
 
 import util.AST.AST;
+import util.AST.BoolVariableDefinition;
+import util.AST.CallableDefinition;
+import util.AST.CommandBlock;
+import util.AST.CommandList;
+import util.AST.DeclarationList;
+import util.AST.Definition;
+import util.AST.Expression;
+import util.AST.FunctionBlock;
+import util.AST.FunctionDefinitionTail;
+import util.AST.FunctionOrDefinitionTail;
+import util.AST.IntVariableDefinition;
+import util.AST.ParametersPrototype;
+import util.AST.ProcedureDefinitionTail;
+import util.AST.Program;
+import util.AST.ResultisCommand;
+import util.AST.VarGlobalDefinition;
+import util.AST.VariableDefinition;
 
 /**
  * Parser class
@@ -23,7 +40,6 @@ public class Parser {
 	 * Parser constructor
 	 */
 	public Parser() {
-
 		this.scanner = new BCPLScanner();
 
 		try {
@@ -40,9 +56,7 @@ public class Parser {
 	 * @throws SyntacticException
 	 */
 	public AST parse() throws SyntacticException {
-		this.parseProgram();
-
-		return null;
+		return parseProgram();
 	}
 
 	/**
@@ -265,7 +279,12 @@ public class Parser {
 	/**
 	 * boolVariableDefinition ::= ('BOOL' Identifier '=' booleanExpression)*;
 	 */
-	private void parseBoolVariableDefinition() throws SyntacticException {
+	private BoolVariableDefinition parseBoolVariableDefinition()
+		throws SyntacticException {
+
+		BoolVariableDefinition boolVariableDefinition =
+			new BoolVariableDefinition();
+
 		while (this.currentToken.getKind() == TokenKind.BOOL) {
 			acceptIt();
 
@@ -275,6 +294,8 @@ public class Parser {
 
 			parseBooleanExpression();
 		}
+
+		return boolVariableDefinition;
 	}
 
 	/**
@@ -292,20 +313,27 @@ public class Parser {
 	/**
 	 * callableDefinition ::= Identifier '(' parametersPrototype ')';
 	 */
-	private void parseCallableDefinition() throws SyntacticException {
+	private CallableDefinition parseCallableDefinition() throws SyntacticException {
+		CallableDefinition callableDefinition;
+
 		accept(TokenKind.IDENTIFIER);
 		accept(TokenKind.LPAR);
 
-		parseParametersPrototype();
+		ParametersPrototype parametersPrototype = parseParametersPrototype();
 
 		accept(TokenKind.RPAR);
 
+		FunctionOrDefinitionTail functionOrDefinitionTail;
+
 		if (currentToken.getKind() == TokenKind.BE) {
-			parseProcedureDefinitonTail();
+			functionOrDefinitionTail = parseProcedureDefinitonTail();
 		}
 		else {
-			parseFunctionDefinitionTail();
+			functionOrDefinitionTail = parseFunctionDefinitionTail();
 		}
+
+		return new CallableDefinition(
+			parametersPrototype, functionOrDefinitionTail);
 	}
 
 	/**
@@ -363,23 +391,22 @@ public class Parser {
 	/**
 	 * commandBlock ::= '{' commandList '}';
 	 */
-	private void parseCommandBlock() throws SyntacticException {
-		if (this.currentToken.getKind() == TokenKind.RCURL) {
-			acceptIt();
+	private CommandBlock parseCommandBlock() throws SyntacticException {
+		acceptIt();
 
-			parseCommandList();
+		CommandBlock commandBlock = parseCommandList();
 
-			accept(TokenKind.LCURL);
-		}
-		else {
-			throw new SyntacticException(null, currentToken);
-		}
+		accept(TokenKind.LCURL);
+
+		return commandBlock;
 	}
 
 	/**
 	 * commandList ::= command (';' command)*;
 	 */
-	private void parseCommandList() throws SyntacticException {
+	private CommandList parseCommandList() throws SyntacticException {
+		CommandList commandList = new CommandList();
+
 		parseCommand();
 
 		while (this.currentToken.getKind() == TokenKind.SEMICOL) {
@@ -387,6 +414,8 @@ public class Parser {
 
 			parseCommand();
 		}
+
+		return commandList;
 	}
 
 	/**
@@ -405,12 +434,14 @@ public class Parser {
 	 * declarationList ::= 'LET' definition ('AND' definition)*; |
 	 * varGlobalDefinition
 	 */
-	private void parseDeclarationList() throws SyntacticException {
+	private DeclarationList parseDeclarationList() throws SyntacticException {
+		DeclarationList declarationList;
+
 		switch (this.currentToken.getKind()) {
 			case LET:
 				acceptIt();
 
-				parseDefinition();
+				declarationList = parseDefinition();
 
 				while (this.currentToken.getKind() == TokenKind.AND) {
 					acceptIt();
@@ -420,23 +451,27 @@ public class Parser {
 
 				break;
 			default:
-				parseVarGlobalDefinition();
+				declarationList = parseVarGlobalDefinition();
 		}
+
+		return declarationList;
 	}
 
 	/**
 	 * definition ::= functionDefinition | procedureDefinition |
 	 * variableDefinition;
 	 */
-	private void parseDefinition() throws SyntacticException {
+	private Definition parseDefinition() throws SyntacticException {
+		Definition definition;
+
 		if (currentToken.getKind() == TokenKind.IDENTIFIER) {
-			parseCallableDefinition();
+			definition = parseCallableDefinition();
 		}
 		else {
-			parseVariableDefinition();
+			definition = parseVariableDefinition();
 		}
 
-		parseVariableDefinition();
+		return definition;
 	}
 
 	/**
@@ -498,21 +533,25 @@ public class Parser {
 		}
 	}
 
-	private void parseExpression() {
+	private Expression parseExpression() {
 		acceptIt();
+
+		return new Expression();
 	}
 
 	/**
 	 * functionBlock ::= '{' commandList resultisCommand '}';
 	 */
-	private void parseFunctionBlock() throws SyntacticException {
+	private FunctionBlock parseFunctionBlock() throws SyntacticException {
 		accept(TokenKind.LCURL);
 
-		parseCommandList();
+		CommandList commandList = parseCommandList();
 
-		parseResultIsCommand();
+		ResultisCommand resultisCommand = parseResultisCommand();
 
 		accept(TokenKind.RCURL);
+
+		return new FunctionBlock(commandList, resultisCommand);
 	}
 
 	/**
@@ -536,11 +575,13 @@ public class Parser {
 	 * functionDefinition ::= Identifier '(' parametersPrototype ')' '=' 'VALOF'
 	 * functionBlock;
 	 */
-	private void parseFunctionDefinitionTail() throws SyntacticException {
+	private FunctionDefinitionTail parseFunctionDefinitionTail()
+		throws SyntacticException {
+
 		accept(TokenKind.OP_ATTR);
 		accept(TokenKind.VALOF);
 
-		parseFunctionBlock();
+		return parseFunctionBlock();
 	}
 
 	/**
@@ -588,7 +629,12 @@ public class Parser {
 	/**
 	 * intVariableDefinition ::= ('INT' Identifier '=' numberExpression)*;
 	 */
-	private void parseIntVariableDefinition() throws SyntacticException {
+	private IntVariableDefinition parseIntVariableDefinition()
+		throws SyntacticException {
+
+		IntVariableDefinition intVariableDefinition =
+			new IntVariableDefinition();
+
 		while (this.currentToken.getKind() == TokenKind.INT) {
 			acceptIt();
 			accept(TokenKind.IDENTIFIER);
@@ -596,6 +642,8 @@ public class Parser {
 
 			parseNumberExpression();
 		}
+
+		return intVariableDefinition;
 	}
 
 	/**
@@ -809,7 +857,11 @@ public class Parser {
 	 * parametersPrototype ::= (('INT' | 'BOOL')Identifier ((, 'INT' |
 	 * 'BOOL')Identifier)*)
 	 */
-	private void parseParametersPrototype() throws SyntacticException {
+	private ParametersPrototype parseParametersPrototype()
+		throws SyntacticException {
+
+		ParametersPrototype parametersPrototype = new ParametersPrototype();
+
 		switch (this.currentToken.getKind()) {
 			case INT:
 			case BOOL:
@@ -835,6 +887,8 @@ public class Parser {
 			default:
 				break;
 		}
+
+		return parametersPrototype;
 	}
 
 	/**
@@ -874,55 +928,59 @@ public class Parser {
 	 * procedureDefinition ::= Identifier '(' parametersPrototype ')' 'BE'
 	 * commandBlock;
 	 */
-	private void parseProcedureDefinitonTail() throws SyntacticException {
-		if (this.currentToken.getKind() == TokenKind.IDENTIFIER) {
-			acceptIt();
-			accept(TokenKind.LPAR);
+	private ProcedureDefinitionTail parseProcedureDefinitonTail()
+		throws SyntacticException {
 
-			parseParametersPrototype();
+		accept(TokenKind.IDENTIFIER);
+		accept(TokenKind.LPAR);
 
-			accept(TokenKind.RPAR);
-			accept(TokenKind.EQUAL);
-			accept(TokenKind.BE);
+		ParametersPrototype parametersPrototype = parseParametersPrototype();
 
-			parseCommandBlock();
-		}
-		else {
-			throw new SyntacticException(null, currentToken);
-		}
+		accept(TokenKind.RPAR);
+		accept(TokenKind.BE);
+
+		CommandBlock commandBlock = parseCommandBlock();
+
+		return new ProcedureDefinitionTail(parametersPrototype, commandBlock);
 	}
 
 	/**
 	 * program ::= declarationList
 	 */
-	private void parseProgram() throws SyntacticException {
-		parseDeclarationList();
+	private Program parseProgram() throws SyntacticException {
+		return parseDeclarationList();
 	}
 
 	/**
 	 * resultisCommand ::= 'RESULTIS' expression;
 	 */
-	private void parseResultIsCommand() throws SyntacticException {
+	private ResultisCommand parseResultisCommand() throws SyntacticException {
 		accept(TokenKind.RESULTIS);
 
-		parseExpression();
+		return parseExpression();
 	}
 
 	/**
 	 * varGlobalDefinition ::= ('GLOBAL') (intVariableDefinition |
 	 * boolVariableDefinition);
 	 */
-	private void parseVarGlobalDefinition() throws SyntacticException {
+	private VarGlobalDefinition parseVarGlobalDefinition()
+		throws SyntacticException {
+
+		VarGlobalDefinition varGlobalDefinition;
+
 		accept(TokenKind.GLOBAL);
 
 		switch (this.currentToken.getKind()) {
 			case INT:
-				parseIntVariableDefinition();
+				varGlobalDefinition = parseIntVariableDefinition();
 
 				break;
 			default:
-				parseBoolVariableDefinition();
+				varGlobalDefinition = parseBoolVariableDefinition();
 		}
+
+		return varGlobalDefinition;
 	}
 
 	/**
@@ -946,17 +1004,23 @@ public class Parser {
 	/**
 	 * variableDefinition ::= intVariableDefinition
 	 */
-	private void parseVariableDefinition() throws SyntacticException {
+	private VariableDefinition parseVariableDefinition()
+		throws SyntacticException {
+
 		if (currentToken.getKind() == TokenKind.GLOBAL) {
 			acceptIt();
 		}
 
+		VariableDefinition variableDefinition;
+
 		if (currentToken.getKind() == TokenKind.INT) {
-			parseIntVariableDefinition();
+			variableDefinition = parseIntVariableDefinition();
 		}
 		else {
-			parseBoolVariableDefinition();
+			variableDefinition = parseBoolVariableDefinition();
 		}
+
+		return variableDefinition;
 	}
 
 	/**

@@ -1,10 +1,5 @@
 package util.AST;
 
-public class CallableDefinition extends Definition {
-
-	public CallableDefinition(
-		ParametersPrototype parametersPrototype,
-		FunctionOrDefinitionTail functionOrDefinitionTail) {
-	}
+public abstract class CallableDefinition extends AST{
 
 }

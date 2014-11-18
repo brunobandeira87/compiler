@@ -87,6 +87,15 @@ public class BCPLScanner extends Scanner {
 		else if (word.equals(ReservedWords.VALOF)) {
 			return TokenKind.VALOF;
 		}
+		else if (word.equals(ReservedWords.CALL)) {
+			return TokenKind.CALL;
+		}
+		else if(word.equals(ReservedWords.VOID)){
+			return TokenKind.VOID;
+		}
+		else if(word.equals(ReservedWords.BE)){
+			return TokenKind.BE;
+		}
 
 		return null;
 	}
@@ -191,8 +200,14 @@ public class BCPLScanner extends Scanner {
 
 				return TokenKind.NUMBER;
 			case '+':
+				getNextChar();
+				return TokenKind.PLUSSIGN;
 			case '-':
+				getNextChar();
+				return TokenKind.MINUSSIGN;
 			case '*':
+				getNextChar();
+				return TokenKind.MULTSIGN;
 			case '/':
 				getNextChar();
 
@@ -207,7 +222,7 @@ public class BCPLScanner extends Scanner {
 					return TokenKind.COMMENT;
 				}
 				else {
-					return TokenKind.OP_ARITMETIC;
+					return TokenKind.DIVSSIGN;
 				}
 
 			case ':':
@@ -264,6 +279,11 @@ public class BCPLScanner extends Scanner {
 				getNextChar();
 
 				return TokenKind.VIRG;
+				
+			case '"':
+				getNextChar();
+				
+				return TokenKind.QUOTE;
 			case 0:
 				return TokenKind.EOF;
 			default:

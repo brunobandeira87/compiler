@@ -5,6 +5,8 @@ public class ReservedWords {
 
 	public static final String AND = "AND";
 
+	public static final String BE = "BE";
+	
 	public static final String BOOL = "BOOL";
 
 	public static final String BREAK = "BREAK";
@@ -32,5 +34,9 @@ public class ReservedWords {
 	public static final String WHILE = "WHILE";
 
 	public static final String WRITEF = "WRITEF";
+	
+	public static final String CALL = "CALL";
+	
+	public static final String VOID = "VOID";
 
 }

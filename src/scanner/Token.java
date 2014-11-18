@@ -62,6 +62,11 @@ public class Token {
 	public String getSpelling() {
 		return spelling;
 	}
+	
+	public String toString(){
+		return spelling;
+		
+	}
 
 	// The line and column that the token was found
 

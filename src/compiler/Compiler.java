@@ -28,7 +28,7 @@ public class Compiler {
 	 * @param args
 	 *            - none
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws SyntacticException {
 
 		// Initializes the identification table with the reserved words
 
@@ -36,11 +36,25 @@ public class Compiler {
 
 		// Creates the parser object
 
+		
+		
+		
 		Parser p = new Parser();
 
 		// Creates the AST object
 
 		AST astRoot = null;
+		
+		//try{
+		//	astRoot = p.parse();
+		//	System.out.println(astRoot.toString());
+			
+		//}catch(SyntacticException e){
+			//System.out.println(e.getMessage().toString());
+
+		//}
+		
+		//System.out.println("heur");
 
 		try {
 
@@ -59,6 +73,8 @@ public class Compiler {
 
 			e.printStackTrace();
 		}
+	
+	
 	}
 
 	/**

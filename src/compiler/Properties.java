@@ -13,6 +13,6 @@ public interface Properties {
 
 	// The source code file
 
-	public static final String sourceCodeLocation = "examples/program01.bcpl";
+	public static final String sourceCodeLocation = "examples/jovem.bcpl";
 
 }

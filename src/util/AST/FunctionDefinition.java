@@ -2,6 +2,7 @@ package util.AST;
 
 import java.util.ArrayList;
 
+import checker.SemanticException;
 import scanner.TokenKind;
 
 public class FunctionDefinition extends CallableDefinition{
@@ -11,13 +12,6 @@ public class FunctionDefinition extends CallableDefinition{
 	private Identifier identifier;
 	private ParametersPrototype parameters; 
 	
-	
-	@Override
-	public String toString(int level) {
-		// TODO Auto-generated method stub
-		
-		return null;
-	}
 	
 	public FunctionDefinition(Tipo tipo, Identifier identifier){
 
@@ -44,9 +38,14 @@ public class FunctionDefinition extends CallableDefinition{
 		this.terminal.add(new Operator(TokenKind.RCURL.toString()));
 		
 	}
+	@Override
+	public String toString(int level) {
+		return null;
+	}
 	
-	
-	
-	
-	
+	@Override
+	public Object visit(Visitor v, Object arg) throws SemanticException {
+		
+		return v.visitFunctionDefintion(this, arg);
+	}
 }

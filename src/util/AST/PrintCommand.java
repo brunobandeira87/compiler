@@ -2,6 +2,7 @@ package util.AST;
 
 import java.util.ArrayList;
 
+import checker.SemanticException;
 import scanner.TokenKind;
 
 public class PrintCommand extends Command{
@@ -32,6 +33,12 @@ public class PrintCommand extends Command{
 	public String toString(int level) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	@Override
+	public Object visit(Visitor v, Object arg) throws SemanticException {
+		// TODO Auto-generated method stub
+		return v.visitPrintCommand(this, arg);
 	}
 
 }

@@ -2,6 +2,7 @@ package util.AST;
 
 import java.util.ArrayList;
 
+import checker.SemanticException;
 import scanner.TokenKind;
 
 public class WhileCommand extends Command {
@@ -11,11 +12,6 @@ public class WhileCommand extends Command {
 	private Expression expression;
 	private ArrayList<Command> command;
 	
-	@Override
-	public String toString(int level) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	private void setTerminal(){
 		this.reservedWord = new ReservedWord(TokenKind.WHILE.toString());
@@ -36,8 +32,17 @@ public class WhileCommand extends Command {
 		this.expression = expression;
 		this.command = command;
 	}
+	@Override
+	public String toString(int level) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-	
+	@Override
+	public Object visit(Visitor v, Object arg) throws SemanticException {
+		// TODO Auto-generated method stub
+		return v.visitWhileCommand(this, arg);
+	}
 	
 
 }

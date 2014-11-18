@@ -2,6 +2,8 @@ package util.AST;
 
 import java.util.ArrayList;
 
+import checker.SemanticException;
+
 public class Program extends AST{
 	private String token = "Program";
 	private ArrayList<VariableGlobalDefinition> variableGlobalDefinition ;
@@ -32,9 +34,12 @@ public class Program extends AST{
 	@Override
 	public String toString(int level) {
 		// TODO Auto-generated method stub
-		
 		return (super.getSpaces(level) + token);
-		
+	}
+	
+	@Override
+	public Object visit(Visitor v, Object arg) throws SemanticException {
+		return v.visitProgram(this, arg);
 	}
 
 }

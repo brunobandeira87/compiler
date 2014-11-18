@@ -1,5 +1,6 @@
 package util.AST;
 
+import checker.SemanticException;
 import scanner.TokenKind;
 
 public class AssignmentCommand extends Command{
@@ -10,11 +11,6 @@ public class AssignmentCommand extends Command{
 	private CallCommand callCommand;
 	
 	
-	@Override
-	public String toString(int level) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	private void setEqualSign(){
 		this.equalSign = new Operator(TokenKind.OP_ATTR.toString());
@@ -32,6 +28,15 @@ public class AssignmentCommand extends Command{
 		this.setEqualSign();
 	}
 	
+	@Override
+	public Object visit(Visitor v, Object arg) throws SemanticException {
+		return v.visitAssignmentCommand(this, arg);
+	}
+	@Override
+	public String toString(int level) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 
 }

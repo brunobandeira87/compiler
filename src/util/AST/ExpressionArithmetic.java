@@ -2,17 +2,13 @@ package util.AST;
 
 import java.util.ArrayList;
 
+import checker.SemanticException;
+
 public class ExpressionArithmetic extends AST{
 
 	private ExpressionMultiplication expressionMultiplicationLeft;
 	private ArrayList<Operator> operadores ;
 	private ArrayList<ExpressionMultiplication> expressionMultiplicationOthers;
-	
-	@Override
-	public String toString(int level) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	public ExpressionMultiplication getExpressionMultiplicationLeft() {
 		return expressionMultiplicationLeft;
@@ -38,5 +34,14 @@ public class ExpressionArithmetic extends AST{
 		this.expressionMultiplicationLeft = expressionMultiplicationLeft;
 	}
 	
+	@Override
+	public String toString(int level) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public Object visit(Visitor v, Object arg) throws SemanticException {
+		return v.visitExpressionArithmetic(this, arg);
+	}
 	
 }

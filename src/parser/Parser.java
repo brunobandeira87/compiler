@@ -6,13 +6,10 @@ import java.util.ArrayList;
 import com.sun.corba.se.spi.ior.IdentifiableContainerBase;
 import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
-import scanner.BCPLScanner;
-import scanner.LexicalException;
-import scanner.Scanner;
-import scanner.Token;
-import scanner.TokenKind;
+import scanner.*;
 import util.AST.*;
 import util.AST.Number;
+
 
 public class Parser {
 
@@ -109,38 +106,15 @@ public class Parser {
 	
 	private VariableGlobalDefinition parseVariableGlobalDefinition() throws SyntacticException{
 		VariableGlobalDefinition variableGlobalDefinition;
-		
 		VariableDefinition variableDefinition;
-		
 		accept(TokenKind.GLOBAL);
 		variableDefinition = parseVariableDefinition();
-		
-		
-		/*Terminal global = null;
-		VariableGlobalDefinition variableGlobalDefinitionAST; 
-		VariableDefinition variableDefinition;
-		switch(this.currentToken.getKind()){
-			case GLOBAL:
-				global = new ReservedWord(this.currentToken.getKind().toString());
-				acceptIt();
-			case VARDEF:
-				variableDefinition = parseVarDefinition();
-				break;
-			default:
-				throw new SyntacticException("ERR23O!!", currentToken);
-		}
-		variableGlobalDefinitionAST = new VariableGlobalDefinition(global, variableDefinition);
-		return variableGlobalDefinitionAST;
-		*/
-		
 		variableGlobalDefinition = new VariableGlobalDefinition(variableDefinition);
 		return variableGlobalDefinition;
 	}
 	
 	private VariableDefinition parseVariableDefinition() throws SyntacticException{
 		VariableDefinition variableDefinitionAST = null;
-		
-		
 		accept(TokenKind.LET);
 		if(this.currentToken.getKind() == TokenKind.INT){
 			variableDefinitionAST = parseIntVariableDefinition();
@@ -150,10 +124,7 @@ public class Parser {
 		else{
 			System.out.println("Treta");
 		}
-		
 		return variableDefinitionAST;
-		
-		
 	}
 	
 	
@@ -207,16 +178,9 @@ public class Parser {
 	
 	private FunctionProcedureDefinitionList parseFuncProcDefinitionList() throws SyntacticException{
 		ArrayList<ReservedWord> reservedWord = new ArrayList<ReservedWord>();
-
-
-	//	Tipo tipo;
-
 		ArrayList<CallableDefinition> callableDefinition = new ArrayList<CallableDefinition>();
-		//Identifier identifier;
 		FunctionProcedureDefinitionList funcprocAST = null;
-		//ParametersPrototype params = null;
-		//boolean hasParams = false;
-
+		
 		if(this.currentToken.getKind() == TokenKind.LET){
 			reservedWord.add(new ReservedWord(TokenKind.LET.toString()));
 			accept(TokenKind.LET);
@@ -233,7 +197,6 @@ public class Parser {
 			throw new SyntacticException("ERROR! " + currentToken.toString(), currentToken);
 		}
 		funcprocAST = new FunctionProcedureDefinitionList(reservedWord, callableDefinition);
-		//System.out.println(funcprocAST.toString());
 		return funcprocAST;
 	}
 	
@@ -243,13 +206,8 @@ public class Parser {
 		
 		if(this.currentToken.getKind() == TokenKind.INT ||
 				this.currentToken.getKind() == TokenKind.BOOL){
-			
-			
-				callAST = parseFunctionDefinition();
-				
-			
-				
-				
+			callAST = parseFunctionDefinition();
+
 		}else if(this.currentToken.getKind() == TokenKind.VOID){
 			
 			callAST = parseProcedureDefinition();
@@ -262,7 +220,6 @@ public class Parser {
 	private FunctionDefinition parseFunctionDefinition() throws SyntacticException{
 		FunctionDefinition funcAST;
 		Tipo tipo;
-		//ArrayList<Terminal> terminal = terminal = new ArrayList<Terminal>();
 		Identifier identifier;
 		ParametersPrototype parametersPrototype = null;
 		ArrayList<VariableDefinition> variableDefinition = new ArrayList<VariableDefinition>();
@@ -297,13 +254,13 @@ public class Parser {
 				
 				accept(TokenKind.RCURL);
 				funcAST = new FunctionDefinition(tipo, identifier);
-				//unctionDefinition(String tipo, ArrayList<Terminal> terminal, Identifier identifier)
+				
 			break;
 			
 			default:
 				throw new SyntacticException("ERROR!", currentToken);
 		}
-		System.out.println(funcAST.toString());
+		
 		return funcAST;
 	}
 	
@@ -379,30 +336,7 @@ public class Parser {
 		}
 		
 		return procedureDefinitionAST;
-		
-		/*
-		if(this.currentToken.getKind() == TokenKind.VOID){
-			acceptIt();
-			accept(TokenKind.IDENTIFIER);
-			accept(TokenKind.LPAR);
-			if(this.currentToken.getKind() == TokenKind.INT || this.currentToken.getKind() == TokenKind.BOOL){
-				parseParametersPrototype();
-			}
-			accept(TokenKind.RPAR);
-			accept(TokenKind.BE);
-			accept(TokenKind.LCURL);
-			parseVariableDefinition();
-			while(this.currentToken.getKind() == TokenKind.LET || this.currentToken.getKind() == TokenKind.IF || this.currentToken.getKind() == TokenKind.WHILE ||
-					this.currentToken.getKind() == TokenKind.WRITEF || this.currentToken.getKind() == TokenKind.IDENTIFIER){
-				parseCommand();
-			}
-			accept(TokenKind.RCURL);
-			
-		}
-		else{
-			throw new SyntacticException("ERRO: Procedure definition", currentToken);
-		}
-		*/
+
 	}
 	
 	private ParametersPrototype parseParametersPrototype() throws SyntacticException{
@@ -634,21 +568,7 @@ public class Parser {
 		
 		params = new ParametersCallCommand(identifier, virg);
 		return params;
-	/*	if(this.currentToken.getKind() == TokenKind.IDENTIFIER){
-			acceptIt();
-			accept(TokenKind.LPAR);
-			if(this.currentToken.getKind() == TokenKind.IDENTIFIER){
-				identifier.add(new Identifier(this.currentToken.getSpelling()));
-			}
-			accept(TokenKind.RPAR);
-		}else{
-			SyntacticException e = new SyntacticException(null, currentToken);
-			System.out.println(e.toString());
-			throw e;
-		}
-		params = new ParametersCallCommand(identifier)
-		*/
-		
+
 	}
 	
 	private IfCommand parseIfCommand() throws SyntacticException{
@@ -747,11 +667,6 @@ public class Parser {
 			
 			default:
 				expressionAST = new Expression(expressionArithmeticLeft);
-				/*
-				SyntacticException e = new SyntacticException(null, currentToken);
-				System.out.println(e.toString());
-				throw e;
-				*/
 		}
 		
 		return expressionAST;
@@ -865,11 +780,7 @@ public class Parser {
 			break;
 
 			default:
-				/*
-				SyntacticException e = new SyntacticException(null, currentToken);
-				System.out.println(e.toString());
-				throw e;
-				*/
+	
 				break;
 				
 			

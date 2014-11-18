@@ -30,19 +30,24 @@ public class IdentificationTable {
 
 		// Puts in the table each language reserved word
 
-		this.table.put(new Key(0, "void"), null);
-		this.table.put(new Key(0, "int"), null);
-		this.table.put(new Key(0, "double"), null);
-		this.table.put(new Key(0, "boolean"), null);
-		this.table.put(new Key(0, "if"), null);
-		this.table.put(new Key(0, "else"), null);
-		this.table.put(new Key(0, "while"), null);
-		this.table.put(new Key(0, "return"), null);
-		this.table.put(new Key(0, "break"), null);
-		this.table.put(new Key(0, "continue"), null);
-		this.table.put(new Key(0, "println"), null);
-		this.table.put(new Key(0, "false"), null);
-		this.table.put(new Key(0, "true"), null);
+		this.table.put(new Key(0, "VOID"), null);
+		this.table.put(new Key(0, "INT"), null);
+		this.table.put(new Key(0, "BOOL"), null);
+		this.table.put(new Key(0, "CALL"), null);
+		this.table.put(new Key(0, "IF"), null);
+		this.table.put(new Key(0, "ELSE"), null);
+		this.table.put(new Key(0, "WHILE"), null);
+		this.table.put(new Key(0, "RESULTIS"), null);
+		this.table.put(new Key(0, "BREAK"), null);
+		this.table.put(new Key(0, "CONTINUE"), null);
+		this.table.put(new Key(0, "WRITEF"), null);
+		this.table.put(new Key(0, "FALSE"), null);
+		this.table.put(new Key(0, "TRUE"), null);
+		this.table.put(new Key(0, "GLOBAL"), null);
+		this.table.put(new Key(0, "LET"), null);
+		this.table.put(new Key(0, "AND"), null);
+		this.table.put(new Key(0, "BE"), null);
+		this.table.put(new Key(0, "VALOF"), null);
 
 		// Initializes currentScope to 0 (global)
 

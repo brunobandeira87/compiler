@@ -2,6 +2,8 @@ package util.AST;
 
 import java.util.ArrayList;
 
+import checker.SemanticException;
+
 public class FunctionProcedureDefinitionList extends AST{
 	private ArrayList<ReservedWord> reservedWord;
 	private ArrayList<CallableDefinition> callabledefinition;
@@ -28,6 +30,11 @@ public class FunctionProcedureDefinitionList extends AST{
 		}
 		
 		return rw.toString() + "\n" + cd.toString();
+	}
+	
+	@Override
+	public Object visit(Visitor v, Object arg) throws SemanticException {
+		return v.visitFunctionProcedureDefinitionList(this, arg);
 	}
 	
 	

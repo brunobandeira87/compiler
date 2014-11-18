@@ -14,6 +14,17 @@ AND VOID juu(INT x, BOOL a, INT z) BE {
         
         WHILE(TRUE){
                 BREAK;
+                WHILE( x == TRUE){
+                        IF(y == 4*2+5){
+                                x = TRUE;
+                        }
+                        ELSE{
+                                x = FALSE;
+                                WHILE(v == 5*2+1){
+                                        x = 5-4*2+1;
+                                }
+                        }
+                }
         }
 }
 

@@ -2,6 +2,8 @@ package util.AST;
 
 import java.util.ArrayList;
 
+import checker.SemanticException;
+
 public class ExpressionMultiplication extends AST{
 	protected Factor factorLeft;
 	protected ArrayList<Operator> operadores;
@@ -30,6 +32,11 @@ public class ExpressionMultiplication extends AST{
 	public String toString(int level) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	@Override
+	public Object visit(Visitor v, Object arg) throws SemanticException {
+		
+		return v.visitExpressionMultiplication(this, arg);
 	}
 	
 	

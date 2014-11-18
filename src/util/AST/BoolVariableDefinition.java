@@ -1,5 +1,7 @@
 package util.AST;
 
+import checker.SemanticException;
+
 public class BoolVariableDefinition extends VariableDefinition {
 
 	
@@ -9,11 +11,6 @@ public class BoolVariableDefinition extends VariableDefinition {
 	private Identifier identifier;
 	private Expression expression;
 	
-	@Override
-	public String toString(int level) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	public BoolVariableDefinition(Terminal equalSign, Terminal tipo,
 			Identifier identifier, Expression expression) {
@@ -24,5 +21,16 @@ public class BoolVariableDefinition extends VariableDefinition {
 		this.expression = expression;
 	}
 	
+	@Override
+	public Object visit(Visitor v, Object arg) throws SemanticException {
+
+		return v.visitBoolVariableDefinition(this, arg);
+	}
+	
+	@Override
+	public String toString(int level) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }

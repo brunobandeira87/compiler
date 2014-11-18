@@ -2,6 +2,7 @@ package util.AST;
 
 import java.util.ArrayList;
 
+import checker.SemanticException;
 import scanner.TokenKind;
 
 // 'VOID' Identifier '(' parametersPrototype? ')' 'BE' '{' varDefinition* command* '}'
@@ -16,7 +17,7 @@ public class ProcedureDefinition extends CallableDefinition{
 	private ArrayList<Command> command;
 	private ParametersPrototype params;
 	
-	void setOperator(){
+	private void setOperator(){
 		this.tipo = new Tipo(TokenKind.VOID.toString());
 		this.terminal = new ArrayList<Terminal>();
 		this.terminal.add( new Operator(TokenKind.LPAR.toString()));
@@ -25,10 +26,7 @@ public class ProcedureDefinition extends CallableDefinition{
 		this.terminal.add( new Operator(TokenKind.LCURL.toString()));
 		this.terminal.add( new Operator(TokenKind.RCURL.toString()));
 	}
-	
-	
-	
-	
+
 	public ProcedureDefinition(Identifier identifier,
 			ArrayList<Command> command, ParametersPrototype params) {
 		this.identifier = identifier;
@@ -37,17 +35,12 @@ public class ProcedureDefinition extends CallableDefinition{
 		this.setOperator();
 	}
 
-
-
-
 	public ProcedureDefinition(Identifier identifier, ParametersPrototype params) {
 
 		this.identifier = identifier;
 		this.params = params;
 		this.setOperator();
 	}
-
-
 
 
 	public ProcedureDefinition(Identifier identifier) { 
@@ -86,17 +79,16 @@ public class ProcedureDefinition extends CallableDefinition{
 		this.setOperator();
 	}
 
-	
-	
-
-
-
-
-
 
 	@Override
 	public String toString(int level) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	@Override
+	public Object visit(Visitor v, Object arg) throws SemanticException {
+		
+		return v.visitProcedureDefinition(this, arg);
 	}
 }

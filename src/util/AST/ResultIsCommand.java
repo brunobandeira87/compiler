@@ -1,5 +1,6 @@
 package util.AST;
 
+import checker.SemanticException;
 import scanner.TokenKind;
 
 public class ResultIsCommand extends Command{
@@ -17,5 +18,11 @@ public class ResultIsCommand extends Command{
 	public String toString(int level) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	@Override
+	public Object visit(Visitor v, Object arg) throws SemanticException {
+		// TODO Auto-generated method stub
+		return v.visitResultIsCommand(this, arg);
 	}
 }

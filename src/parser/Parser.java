@@ -197,6 +197,7 @@ public class Parser {
 			throw new SyntacticException("ERROR! " + currentToken.toString(), currentToken);
 		}
 		funcprocAST = new FunctionProcedureDefinitionList(reservedWord, callableDefinition);
+		System.out.println(funcprocAST.toString(0));
 		return funcprocAST;
 	}
 	

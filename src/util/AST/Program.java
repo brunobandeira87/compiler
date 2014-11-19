@@ -9,6 +9,10 @@ public class Program extends AST{
 	private ArrayList<VariableGlobalDefinition> variableGlobalDefinition ;
 	private FunctionProcedureDefinitionList functionProcedureDefinitionList;
 	
+	/*
+	 * Construtores
+	 * */
+	
 	public Program(FunctionProcedureDefinitionList functionProcedureDefinitionList){
 		this.functionProcedureDefinitionList = functionProcedureDefinitionList;
 	}
@@ -19,22 +23,37 @@ public class Program extends AST{
 	}
 	
 	
-	public ArrayList<VariableGlobalDefinition> getVariableGlobalDefinition() {
-		return variableGlobalDefinition;
+	
+	/*
+	 * Getters
+	 * */
+	 
+	public ArrayList<VariableGlobalDefinition> getVariableGlobalDefinition(){
+		return this.variableGlobalDefinition;
 	}
-
-
-
-	public void setVariableGlobalDefinition(
-			ArrayList<VariableGlobalDefinition> variableGlobalDefinition) {
-		this.variableGlobalDefinition = variableGlobalDefinition;
+	
+	public FunctionProcedureDefinitionList getFunctionProcedureDefinitionList(){
+		return this.functionProcedureDefinitionList;
 	}
-
-
+	
+	
+	
 	@Override
 	public String toString(int level) {
-		// TODO Auto-generated method stub
-		return (super.getSpaces(level) + token);
+		StringBuffer vg = new StringBuffer();
+		StringBuffer fpl = new StringBuffer();
+		
+		if(this.variableGlobalDefinition != null){
+			for(VariableGlobalDefinition vgd : this.variableGlobalDefinition){
+				vg.append(vgd.toString(level));
+			}
+		}
+		if(this.functionProcedureDefinitionList != null){
+			fpl.append(this.functionProcedureDefinitionList.toString(level));
+		}
+		
+		
+		return (super.getSpaces(level) + token + "\n" + vg + "\t" + fpl);
 	}
 	
 	@Override

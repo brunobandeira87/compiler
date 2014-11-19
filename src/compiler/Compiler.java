@@ -1,11 +1,11 @@
 
 package compiler;
 
+import checker.Checker;
+import checker.SemanticException;
 import parser.Parser;
 import parser.SyntacticException;
-
 import util.AST.AST;
-
 import util.symbolsTable.IdentificationTable;
 
 /**
@@ -44,18 +44,7 @@ public class Compiler {
 		// Creates the AST object
 
 		AST astRoot = null;
-		
-		//try{
-		//	astRoot = p.parse();
-		//	System.out.println(astRoot.toString());
-			
-		//}catch(SyntacticException e){
-			//System.out.println(e.getMessage().toString());
-
-		//}
-		
-		//System.out.println("heur");
-
+	
 		try {
 
 			// Parses the source code
@@ -65,6 +54,13 @@ public class Compiler {
 
 			if (astRoot != null) {
 				System.out.println(astRoot.toString(0));
+			}
+			
+			Checker checker = new Checker();
+			try{
+				checker.check(astRoot);
+			} catch(SemanticException e){
+				System.out.println(e.getMessage().toString());
 			}
 		}
 		catch (SyntacticException e) {

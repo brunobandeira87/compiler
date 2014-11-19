@@ -18,7 +18,8 @@ public class VariableGlobalDefinition extends AST{
 	
 	@Override
 	public String toString(int level) {
-		// TODO Auto-generated method stub
+		String rw = reserverdWord.spelling;
+		VariableDefinition var = this.variableDefinition;
 		return null;
 	}
 	

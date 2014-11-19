@@ -2,26 +2,42 @@ package checker;
 
 import util.AST.*;
 import util.AST.Number;
+import util.symbolsTable.IdentificationTable;
 
 
 public final class Checker implements Visitor {
+	
+	private IdentificationTable identificationTable;
+	
 
-	public Object visitProgram(Program program, Object arg)
-			throws SemanticException {
-		// TODO Auto-generated method stub
+	public void check(AST ast) throws SemanticException{
+		this.identificationTable = new IdentificationTable();
+		ast.visit(this,null);
+	}
+	
+	
+	public Object visitProgram(Program program, Object arg) throws SemanticException {
+		
+		if(program.getVariableGlobalDefinition() != null){
+			for(VariableGlobalDefinition var : program.getVariableGlobalDefinition()){
+				var.visit(this, null);
+			}
+		}
+		
+		FunctionProcedureDefinitionList funcprocDef = program.getFunctionProcedureDefinitionList();
+		if(funcprocDef != null){
+			funcprocDef.visit(this, null);
+		}
+		
 		return null;
 	}
 
-	public Object visitVariableGlobalDefinition(VariableGlobalDefinition var,
-			Object arg) throws SemanticException {
-		// TODO Auto-generated method stub
+	public Object visitVariableGlobalDefinition(VariableGlobalDefinition var, Object arg) throws SemanticException {
 		return null;
 	}
 
-	public Object visitFunctionProcedureDefinitionList(
-			FunctionProcedureDefinitionList funcProcDef, Object arg)
-			throws SemanticException {
-		// TODO Auto-generated method stub
+	public Object visitFunctionProcedureDefinitionList(	FunctionProcedureDefinitionList funcProcDef, Object arg) throws SemanticException {
+
 		return null;
 	}
 
